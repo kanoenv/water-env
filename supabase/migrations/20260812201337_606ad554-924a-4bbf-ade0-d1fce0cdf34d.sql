@@ -1,0 +1,3 @@
+CREATE POLICY "Anyone can upload report photos" ON storage.objects FOR INSERT TO anon, authenticated WITH CHECK (bucket_id = 'report-photos');
+CREATE POLICY "Admins can view report photos" ON storage.objects FOR SELECT TO authenticated USING (bucket_id = 'report-photos' AND has_role(auth.uid(), 'admin'::app_role));
+CREATE POLICY "Admins can delete report photos" ON storage.objects FOR DELETE TO authenticated USING (bucket_id = 'report-photos' AND has_role(auth.uid(), 'admin'::app_role));

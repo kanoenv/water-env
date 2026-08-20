@@ -31,7 +31,8 @@ const ReportIssue = () => {
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
-  
+  const [photos, setPhotos] = useState<File[]>([]);
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -44,11 +45,40 @@ const ReportIssue = () => {
     },
   });
 
+  const handlePhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || []).slice(0, 4);
+    const tooBig = files.find((f) => f.size > 5 * 1024 * 1024);
+    if (tooBig) {
+      toast({ title: 'Photo too large', description: 'Each photo must be under 5MB.', variant: 'destructive' });
+      return;
+    }
+    setPhotos(files);
+  };
+
+  const uploadPhotos = async () => {
+    const paths: string[] = [];
+    for (const file of photos) {
+      const ext = file.name.split('.').pop() || 'jpg';
+      const path = `${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
+      const { error } = await supabase.storage.from('report-photos').upload(path, file, {
+        cacheControl: '3600',
+        upsert: false,
+      });
+      if (error) {
+        console.error('Photo upload failed:', error);
+        continue;
+      }
+      paths.push(path);
+    }
+    return paths;
+  };
+
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     setIsSubmitting(true);
-    
+
     try {
-      // Map form values to database structure
+      const photoPaths = photos.length ? await uploadPhotos() : [];
+
       const reportData = {
         type: values.issueType,
         location: values.location,
@@ -57,10 +87,8 @@ const ReportIssue = () => {
         reporter_email: values.email,
         reporter_phone: values.phone,
         status: 'New',
-        photos: []
+        photos: photoPaths
       };
-
-      console.log('Submitting report:', reportData);
 
       const { error } = await supabase
         .from('reports')
@@ -70,27 +98,27 @@ const ReportIssue = () => {
         throw error;
       }
 
-      console.log('Report submitted successfully');
-      
       toast({
         title: "Report submitted successfully",
-        description: "Thank you for reporting this issue. We will investigate promptly and keep you updated.",
+        description: "Thank you for reporting this issue. It has been sent to the Ministry response team.",
       });
-      
+
       setIsSubmitted(true);
+      setPhotos([]);
       form.reset();
-      
+
     } catch (error) {
       console.error('Error submitting report:', error);
       toast({
         title: "Error submitting report",
-        description: "Please try again later or contact us directly.",
+        description: "Please try again later or call the hotline on +234 803 071 9901.",
         variant: "destructive"
       });
     } finally {
       setIsSubmitting(false);
     }
   };
+
 
   if (isSubmitted) {
     return (
@@ -279,14 +307,23 @@ const ReportIssue = () => {
                       />
                       
                       <div>
-                        <Button type="button" variant="outline" className="flex items-center gap-2" disabled>
+                        <FormLabel>Photos (optional)</FormLabel>
+                        <label className="mt-2 flex items-center gap-2 w-fit cursor-pointer rounded-md border border-input bg-background px-4 py-2 text-sm font-medium hover:bg-accent">
                           <Upload size={16} />
-                          Add Photos (Coming Soon)
-                        </Button>
+                          {photos.length ? `${photos.length} photo(s) selected` : 'Add Photos'}
+                          <input
+                            type="file"
+                            accept="image/*"
+                            multiple
+                            className="hidden"
+                            onChange={handlePhotoChange}
+                          />
+                        </label>
                         <FormDescription className="mt-2">
-                          Photo upload functionality will be available soon. For now, please provide a detailed description.
+                          Up to 4 images, max 5MB each. Photos are attached to your report for the response team.
                         </FormDescription>
                       </div>
+
                       
                       <Button 
                         type="submit" 

@@ -1,218 +1,313 @@
-
 import React from 'react';
-import { Card, CardContent } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { TreePine, FileText, Users, AlertTriangle, BarChart3, Droplets, ArrowRight, Shield, Building2, Leaf } from 'lucide-react';
+import { TreePine, FileText, AlertTriangle, BarChart3, Droplets, ArrowUpRight, Shield } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
-const QuickLinks = () => {
-  const quickActions = [
-    {
-      title: "Environmental Intelligence",
-      description: "Advanced environmental monitoring and reporting platform with real-time analytics and predictive insights for sustainable development.",
-      icon: AlertTriangle,
-      color: "text-red-600",
-      bgColor: "bg-gradient-to-br from-red-50 via-red-25 to-white",
-      borderColor: "border-red-200/30",
-      buttonColor: "bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800",
-      href: "/report-issue",
-      badge: "Critical",
-      badgeColor: "bg-red-600"
-    },
-    {
-      title: "Forest Conservation Initiative",
-      description: "Comprehensive reforestation program with advanced tracking systems and community engagement for the Five Million Trees Campaign 2025.",
-      icon: TreePine,
-      color: "text-emerald-600",
-      bgColor: "bg-gradient-to-br from-emerald-50 via-emerald-25 to-white",
-      borderColor: "border-emerald-200/30",
-      buttonColor: "bg-gradient-to-r from-emerald-600 to-emerald-700 hover:from-emerald-700 hover:to-emerald-800",
-      href: "/programs/five-million-trees",
-      badge: "Active",
-      badgeColor: "bg-emerald-600"
-    },
-    {
-      title: "Climate Resilience Hub",
-      description: "Integrated climate adaptation strategies with community-based solutions and cutting-edge environmental technology platforms.",
-      icon: Shield,
-      color: "text-blue-600",
-      bgColor: "bg-gradient-to-br from-blue-50 via-blue-25 to-white",
-      borderColor: "border-blue-200/30",
-      buttonColor: "bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800",
-      href: "/get-involved",
-      badge: "Innovation",
-      badgeColor: "bg-blue-600"
-    },
-    {
-      title: "Environmental Analytics",
-      description: "Comprehensive data intelligence platform with machine learning insights, environmental impact assessments, and performance monitoring.",
-      icon: BarChart3,
-      color: "text-purple-600",
-      bgColor: "bg-gradient-to-br from-purple-50 via-purple-25 to-white",
-      borderColor: "border-purple-200/30",
-      buttonColor: "bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800",
-      href: "/monitoring",
-      badge: "Analytics",
-      badgeColor: "bg-purple-600"
-    },
-    {
-      title: "Air Quality Excellence",
-      description: "State-of-the-art air quality monitoring network with IoT sensors, health impact analysis, and real-time public alerts system.",
-      icon: Droplets,
-      color: "text-cyan-600",
-      bgColor: "bg-gradient-to-br from-cyan-50 via-cyan-25 to-white",
-      borderColor: "border-cyan-200/30",
-      buttonColor: "bg-gradient-to-r from-cyan-600 to-cyan-700 hover:from-cyan-700 hover:to-cyan-800",
-      href: "/monitoring/air-quality",
-      badge: "Health",
-      badgeColor: "bg-cyan-600"
-    },
-    {
-      title: "Regulatory Excellence",
-      description: "Comprehensive regulatory framework with digital compliance tools, environmental standards, and policy implementation guidelines.",
-      icon: FileText,
-      color: "text-indigo-600",
-      bgColor: "bg-gradient-to-br from-indigo-50 via-indigo-25 to-white",
-      borderColor: "border-indigo-200/30",
-      buttonColor: "bg-gradient-to-r from-indigo-600 to-indigo-700 hover:from-indigo-700 hover:to-indigo-800",
-      href: "/resources",
-      badge: "Policy",
-      badgeColor: "bg-indigo-600"
-    }
-  ];
+const quickActions = [
+  {
+    number: '01',
+    title: 'Report an Environmental Issue',
+    description: 'Illegal dumping, pollution, water wastage or environmental hazards — routed directly to our rapid response team across all 44 LGAs.',
+    icon: AlertTriangle,
+    href: '/report-issue',
+    tag: 'Priority Response',
+    meta: 'Avg. response · 24 hrs',
+    ref: 'MOECC / RPT-001',
+    tagStyle: 'critical',
+  },
+  {
+    number: '02',
+    title: '10 Million Trees Campaign',
+    description: 'Apply for free seedlings, receive planting training, and track your contribution through our transparent digital ledger.',
+    icon: TreePine,
+    href: '/programs/ten-million-trees',
+    tag: 'Active Programme',
+    meta: 'Cycle · 2026',
+    ref: 'MOECC / PRG-010M',
+    tagStyle: 'active',
+  },
+  {
+    number: '03',
+    title: 'Air Quality Index',
+    description: 'Live PM2.5, PM10 and AQI readings across Kano metropolis, benchmarked to WHO Air Quality Guidelines with health advisories.',
+    icon: Droplets,
+    href: '/monitoring/air-quality',
+    tag: 'Live Data',
+    meta: 'Updated hourly',
+    ref: 'MOECC / AQI-KAN',
+    tagStyle: 'live',
+  },
+  {
+    number: '04',
+    title: 'Environmental Monitoring',
+    description: 'Erosion mapping, tree-planting tracker and water quality dashboards maintained by our field and GIS teams.',
+    icon: BarChart3,
+    href: '/monitoring',
+    tag: 'Public Dashboards',
+    meta: 'Open data',
+    ref: 'MOECC / MON-004',
+    tagStyle: 'info',
+  },
+  {
+    number: '05',
+    title: 'Get Involved',
+    description: 'Volunteer, join the Climate Actor Registry, or partner with the Ministry on accredited public–private initiatives.',
+    icon: Shield,
+    href: '/get-involved',
+    tag: 'Partnership',
+    meta: 'Citizens & organisations',
+    ref: 'MOECC / PPP-005',
+    tagStyle: 'accent',
+  },
+  {
+    number: '06',
+    title: 'Laws & Resources',
+    description: 'Environmental legislation, policy frameworks, gazettes and official ministry publications — free public download.',
+    icon: FileText,
+    href: '/resources',
+    tag: 'Policy Library',
+    meta: 'PDF · Public record',
+    ref: 'MOECC / LEX-006',
+    tagStyle: 'neutral',
+  },
+];
 
+const tagStyles: Record<string, { wrap: string; dot: string; label: string; iconGrad: string; iconShadow: string; topBar: string; hoverBorder: string; hoverTitle: string; accessText: string; corner: string }> = {
+  critical: {
+    wrap: 'bg-red-50 border-red-200 text-red-800',
+    dot: 'bg-red-600 shadow-[0_0_0_3px_rgba(220,38,38,0.15)] animate-pulse',
+    label: 'text-red-800',
+    iconGrad: 'from-red-600 to-rose-700',
+    iconShadow: 'shadow-red-600/25',
+    topBar: 'from-red-600 via-red-500 to-amber-500',
+    hoverBorder: 'hover:border-red-300',
+    hoverTitle: 'group-hover:text-red-700',
+    accessText: 'text-red-700',
+    corner: 'bg-amber-400',
+  },
+  active: {
+    wrap: 'bg-emerald-50 border-emerald-200 text-emerald-800',
+    dot: 'bg-emerald-600 shadow-[0_0_0_3px_rgba(5,150,105,0.15)]',
+    label: 'text-emerald-800',
+    iconGrad: 'from-kano-primary to-kano-secondary',
+    iconShadow: 'shadow-kano-primary/25',
+    topBar: 'from-kano-primary via-emerald-500 to-kano-accent',
+    hoverBorder: 'hover:border-kano-primary/40',
+    hoverTitle: 'group-hover:text-kano-primary',
+    accessText: 'text-kano-primary',
+    corner: 'bg-kano-accent',
+  },
+  live: {
+    wrap: 'bg-sky-50 border-sky-200 text-sky-800',
+    dot: 'bg-sky-600 shadow-[0_0_0_3px_rgba(2,132,199,0.15)] animate-pulse',
+    label: 'text-sky-800',
+    iconGrad: 'from-sky-600 to-cyan-600',
+    iconShadow: 'shadow-sky-600/25',
+    topBar: 'from-sky-600 via-cyan-500 to-teal-400',
+    hoverBorder: 'hover:border-sky-300',
+    hoverTitle: 'group-hover:text-sky-700',
+    accessText: 'text-sky-700',
+    corner: 'bg-cyan-400',
+  },
+  info: {
+    wrap: 'bg-indigo-50 border-indigo-200 text-indigo-800',
+    dot: 'bg-indigo-600 shadow-[0_0_0_3px_rgba(79,70,229,0.15)]',
+    label: 'text-indigo-800',
+    iconGrad: 'from-indigo-600 to-violet-700',
+    iconShadow: 'shadow-indigo-600/25',
+    topBar: 'from-indigo-600 via-violet-500 to-fuchsia-400',
+    hoverBorder: 'hover:border-indigo-300',
+    hoverTitle: 'group-hover:text-indigo-700',
+    accessText: 'text-indigo-700',
+    corner: 'bg-violet-400',
+  },
+  accent: {
+    wrap: 'bg-amber-50 border-amber-200 text-amber-900',
+    dot: 'bg-amber-600 shadow-[0_0_0_3px_rgba(217,119,6,0.15)]',
+    label: 'text-amber-900',
+    iconGrad: 'from-amber-500 to-orange-600',
+    iconShadow: 'shadow-amber-600/25',
+    topBar: 'from-amber-500 via-orange-500 to-red-400',
+    hoverBorder: 'hover:border-amber-300',
+    hoverTitle: 'group-hover:text-amber-700',
+    accessText: 'text-amber-700',
+    corner: 'bg-orange-400',
+  },
+  neutral: {
+    wrap: 'bg-slate-100 border-slate-300 text-slate-800',
+    dot: 'bg-slate-700 shadow-[0_0_0_3px_rgba(51,65,85,0.15)]',
+    label: 'text-slate-800',
+    iconGrad: 'from-slate-700 to-slate-900',
+    iconShadow: 'shadow-slate-700/25',
+    topBar: 'from-slate-700 via-slate-600 to-kano-accent',
+    hoverBorder: 'hover:border-slate-400',
+    hoverTitle: 'group-hover:text-slate-900',
+    accessText: 'text-slate-800',
+    corner: 'bg-kano-accent',
+  },
+};
+
+const QuickLinks = () => {
   return (
-    <section className="py-8 md:py-12 lg:py-16 bg-gradient-to-br from-slate-50 via-gray-50 to-white relative overflow-hidden">
-      {/* Enhanced Background Elements */}
-      <div className="absolute inset-0">
-        <div className="absolute top-0 left-0 w-full h-full bg-grid-pattern opacity-[0.015]"></div>
-        <div className="absolute top-10 left-1/4 w-[200px] h-[200px] md:w-[300px] md:h-[300px] bg-gradient-to-br from-emerald-500/6 to-blue-500/6 rounded-full blur-3xl"></div>
-        <div className="absolute bottom-10 right-1/4 w-[150px] h-[150px] md:w-[250px] md:h-[250px] bg-gradient-to-br from-purple-500/4 to-pink-500/4 rounded-full blur-3xl"></div>
-        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[300px] h-[150px] md:w-[400px] md:h-[200px] bg-gradient-to-r from-blue-500/2 to-emerald-500/2 rounded-full blur-3xl"></div>
-      </div>
-      
-      <div className="container-custom relative z-10">
-        {/* Enhanced Header Section - Optimized for Desktop/Tablet */}
-        <div className="text-center mb-8 md:mb-12 lg:mb-16">
-          <div className="inline-flex items-center gap-2 px-4 py-2 bg-white/90 backdrop-blur-lg border border-emerald-200/50 text-emerald-700 rounded-full text-xs md:text-sm font-bold mb-4 md:mb-6 shadow-lg hover:shadow-xl transition-all duration-300">
-            <div className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></div>
-            <span>Advanced Digital Environmental Solutions</span>
-            <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse" style={{ animationDelay: '0.5s' }}></div>
+    <section className="py-20 lg:py-28 bg-white relative border-y border-slate-200">
+      {/* Subtle blueprint grid */}
+      <div
+        aria-hidden
+        className="absolute inset-0 opacity-[0.025] pointer-events-none"
+        style={{
+          backgroundImage:
+            'linear-gradient(to right, #0f172a 1px, transparent 1px), linear-gradient(to bottom, #0f172a 1px, transparent 1px)',
+          backgroundSize: '48px 48px',
+        }}
+      />
+
+      <div className="container-custom relative">
+        {/* Header — official document style */}
+        <div className="mb-14">
+          {/* Top meta row */}
+          <div className="flex flex-wrap items-center justify-between gap-3 pb-4 mb-8 border-b border-slate-900/10">
+            <div className="flex items-center gap-3">
+              <span className="inline-flex items-center gap-2 text-[10.5px] font-mono font-semibold tracking-[0.2em] uppercase text-slate-700">
+                <span className="w-1.5 h-1.5 bg-kano-primary" />
+                Section 01
+              </span>
+              <span className="hidden sm:inline text-[10.5px] font-mono tracking-[0.2em] uppercase text-slate-400">
+                / Citizen Services Directory
+              </span>
+            </div>
+            <span className="text-[10.5px] font-mono tracking-[0.2em] uppercase text-slate-400">
+              Ref · MOECC-KS / 2026
+            </span>
           </div>
-          
-          <h2 className="text-xl md:text-2xl lg:text-3xl xl:text-4xl font-black text-gray-900 mb-4 md:mb-6 leading-tight tracking-tight px-4 max-w-4xl mx-auto">
-            Kano State: Advancing Water Security, Climate Action and Environmental Sustainability
-          </h2>
-          
-          <p className="text-sm md:text-base lg:text-lg text-gray-600 max-w-3xl mx-auto leading-relaxed font-medium mb-4 md:mb-6 px-4">
-            Under the Ministry of Water Resources, Environment and Climate Change, Kano State is delivering an integrated agenda — safeguarding water supply, accelerating climate resilience, and protecting our natural environment. Through evidence-based policy, community partnership and disciplined execution, we are building a healthier, more sustainable future for every resident across all 44 LGAs.
-          </p>
-          
-          {/* Statistics Bar - Optimized for Desktop/Tablet */}
-          <div className="flex flex-wrap justify-center gap-3 md:gap-4 lg:gap-6 mt-6 md:mt-8 px-4">
-            <div className="bg-white/80 backdrop-blur-sm rounded-xl px-3 md:px-4 py-2 md:py-3 shadow-lg border border-gray-200/50">
-              <div className="text-base md:text-lg lg:text-xl font-black text-emerald-600 mb-1">500K+</div>
-              <div className="text-gray-600 font-medium text-xs md:text-sm">Trees Planted</div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-end">
+            <div className="lg:col-span-8">
+              <div className="inline-flex items-center gap-2 mb-5 px-3 py-1.5 rounded-full bg-kano-primary/5 border border-kano-primary/20">
+                <span className="w-1.5 h-1.5 rounded-full bg-kano-primary animate-pulse" />
+                <span className="text-[10.5px] font-mono font-semibold tracking-[0.18em] uppercase text-kano-primary">
+                  Public Access · Live Services
+                </span>
+              </div>
+              <h2
+                className="text-3xl md:text-4xl lg:text-[3.15rem] font-serif text-slate-900 leading-[1.1] tracking-tight"
+                style={{ fontFamily: "'Merriweather', Georgia, serif" }}
+              >
+                Every Ministry service,
+                <br className="hidden sm:block" />
+                <span className="text-kano-primary italic">one trusted gateway.</span>
+              </h2>
             </div>
-            <div className="bg-white/80 backdrop-blur-sm rounded-xl px-3 md:px-4 py-2 md:py-3 shadow-lg border border-gray-200/50">
-              <div className="text-base md:text-lg lg:text-xl font-black text-blue-600 mb-1">250+</div>
-              <div className="text-gray-600 font-medium text-xs md:text-sm">Communities</div>
-            </div>
-            <div className="bg-white/80 backdrop-blur-sm rounded-xl px-3 md:px-4 py-2 md:py-3 shadow-lg border border-gray-200/50">
-              <div className="text-base md:text-lg lg:text-xl font-black text-purple-600 mb-1">24/7</div>
-              <div className="text-gray-600 font-medium text-xs md:text-sm">Monitoring</div>
+            <div className="lg:col-span-4">
+              <div className="relative pl-5 border-l-2 border-kano-primary/30">
+                <p className="text-slate-700 text-[15px] leading-[1.75] font-light">
+                  From <span className="font-semibold text-slate-900">real-time environmental data</span> to <span className="font-semibold text-slate-900">citizen reporting</span> and <span className="font-semibold text-slate-900">programme applications</span> — the Ministry's digital front door for the people of Kano State.
+                </p>
+                <div className="mt-4 flex items-center gap-4 text-[10.5px] font-mono tracking-[0.15em] uppercase text-slate-500">
+                  <span className="flex items-center gap-1.5">
+                    <span className="w-1 h-1 rounded-full bg-emerald-500" />
+                    Verified
+                  </span>
+                  <span className="flex items-center gap-1.5">
+                    <span className="w-1 h-1 rounded-full bg-emerald-500" />
+                    Free to use
+                  </span>
+                  <span className="flex items-center gap-1.5">
+                    <span className="w-1 h-1 rounded-full bg-emerald-500" />
+                    24/7
+                  </span>
+                </div>
+              </div>
             </div>
           </div>
         </div>
-        
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 lg:gap-8">
-          {quickActions.map((action, index) => {
-            const IconComponent = action.icon;
+
+        {/* Card grid — dossier layout */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {quickActions.map((a) => {
+            const Icon = a.icon;
+            const t = tagStyles[a.tagStyle] ?? tagStyles.neutral;
             return (
-              <Card 
-                key={index} 
-                className={`group relative overflow-hidden border-0 shadow-xl hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-1 ${action.bgColor} backdrop-blur-sm hover:scale-[1.01]`}
-                style={{
-                  animationDelay: `${index * 150}ms`,
-                  animation: 'fade-in 0.8s ease-out forwards'
-                }}
+              <Link
+                key={a.title}
+                to={a.href}
+                className={`group relative bg-white border border-slate-200 rounded-xl overflow-hidden ${t.hoverBorder} hover:shadow-xl hover:shadow-slate-200/60 transition-all duration-300 flex flex-col`}
               >
-                {/* Visual Effects */}
-                <div className="absolute inset-0 bg-gradient-to-br from-white/20 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-                <div className={`absolute top-0 left-0 w-full h-1 bg-gradient-to-r ${action.buttonColor.replace('bg-gradient-to-r', '').replace('hover:from-', '').split(' ')[0]} ${action.buttonColor.replace('bg-gradient-to-r', '').replace('hover:from-', '').split(' ')[1]}`}></div>
-                
-                <CardContent className="p-4 md:p-5 lg:p-6 relative">
-                  <div className="flex flex-col items-start text-left">
-                    {/* Professional Icon Container - Mobile responsive sizing */}
-                    <div className="relative mb-3 md:mb-4">
-                      <div className={`relative p-2 md:p-3 lg:p-4 rounded-xl ${action.bgColor} border-2 ${action.borderColor} group-hover:scale-105 transition-all duration-400 shadow-lg`}>
-                        <IconComponent className={`w-6 h-6 md:w-8 md:h-8 lg:w-10 lg:h-10 ${action.color}`} strokeWidth={1.5} />
-                        <div className={`absolute inset-0 rounded-xl ${action.color.replace('text-', 'bg-')}/8 group-hover:${action.color.replace('text-', 'bg-')}/15 transition-colors duration-400`}></div>
+                {/* Top accent bar */}
+                <div className={`h-1 bg-gradient-to-r ${t.topBar} transform origin-left scale-x-0 group-hover:scale-x-100 transition-transform duration-500`} />
+
+                <div className="p-7 flex flex-col flex-grow">
+                  {/* Header row: icon + service code */}
+                  <div className="flex items-start justify-between mb-6">
+                    <div className="relative">
+                      <div className={`w-14 h-14 rounded-xl bg-gradient-to-br ${t.iconGrad} flex items-center justify-center text-white shadow-lg ${t.iconShadow} group-hover:scale-105 transition-transform duration-300`}>
+                        <Icon className="w-6 h-6" strokeWidth={1.75} />
                       </div>
-                      {/* Mobile Responsive Badge */}
-                      <div className={`absolute -top-1 -right-1 sm:-top-2 sm:-right-2 px-2 py-1 sm:px-3 sm:py-1.5 ${action.badgeColor} text-white text-xs font-bold rounded-full shadow-lg ring-1 ring-white sm:ring-2 flex items-center gap-1 sm:gap-1.5`}>
-                        <div className="w-1 h-1 sm:w-1.5 sm:h-1.5 bg-white rounded-full animate-pulse"></div>
-                        <span className="text-xs sm:text-sm">{action.badge}</span>
-                      </div>
+                      <span className={`absolute -bottom-1 -right-1 w-5 h-5 rounded-full ${t.corner} border-2 border-white`} />
                     </div>
-                    
-                    {/* Professional Content - Mobile responsive text */}
-                    <h3 className="font-black text-base md:text-lg lg:text-xl text-gray-900 mb-2 md:mb-3 group-hover:text-gray-800 transition-colors duration-300 leading-tight">
-                      {action.title}
-                    </h3>
-                    <p className="text-gray-700 text-xs md:text-sm mb-4 md:mb-5 leading-relaxed line-clamp-3 font-medium">
-                      {action.description}
-                    </p>
-                    
-                    {/* Professional CTA Button - Mobile responsive */}
-                    <Button 
-                      asChild
-                      className={`w-full font-bold text-xs md:text-sm py-2 md:py-3 px-3 md:px-4 rounded-lg transition-all duration-400 ${action.buttonColor} text-white border-0 shadow-lg hover:shadow-xl group/btn overflow-hidden relative`}
-                    >
-                      <Link to={action.href} className="flex items-center justify-center gap-2 relative z-10">
-                        <span>Access Platform</span>
-                        <ArrowRight className="w-3 h-3 md:w-4 md:h-4 transition-transform duration-300 group-hover/btn:translate-x-1" strokeWidth={2} />
-                        <div className="absolute inset-0 bg-white/10 translate-x-[-100%] group-hover/btn:translate-x-[100%] transition-transform duration-700 skew-x-12"></div>
-                      </Link>
-                    </Button>
+                    <div className="text-right">
+                      <div className="text-[10px] font-mono uppercase tracking-widest text-slate-400">Service</div>
+                      <div className="text-2xl font-serif text-slate-900 leading-none mt-0.5" style={{ fontFamily: "'Merriweather', Georgia, serif" }}>{a.number}</div>
+                    </div>
                   </div>
-                </CardContent>
-              </Card>
+
+                  {/* Status tag */}
+                  <div className="mb-4">
+                    <span className={`inline-flex items-center gap-1.5 text-[10px] font-bold tracking-[0.16em] uppercase border px-2.5 py-1 rounded-sm ${t.wrap}`}>
+                      <span className={`w-1.5 h-1.5 rounded-full ${t.dot}`} />
+                      <span className={t.label}>{a.tag}</span>
+                    </span>
+                  </div>
+
+                  {/* Title */}
+                  <h3 className={`font-bold text-lg text-slate-900 mb-2 leading-snug ${t.hoverTitle} transition-colors`}>
+                    {a.title}
+                  </h3>
+
+                  {/* Divider */}
+                  <div className={`w-10 h-px bg-slate-200 group-hover:w-16 transition-all duration-500 mb-3`} />
+
+                  {/* Description */}
+                  <p className="text-slate-600 text-sm leading-relaxed mb-6 flex-grow">
+                    {a.description}
+                  </p>
+
+                  {/* Footer meta */}
+                  <div className="flex items-center justify-between pt-4 border-t border-dashed border-slate-200">
+                    <div className="flex items-center gap-1.5">
+                      <span className={`w-1.5 h-1.5 rounded-full ${t.dot}`} />
+                      <span className="text-[10px] font-mono uppercase tracking-widest text-slate-500">{a.meta}</span>
+                    </div>
+                    <span className={`inline-flex items-center gap-1 text-[10px] font-semibold tracking-[0.18em] uppercase ${t.accessText}`}>
+                      Access
+                      <ArrowUpRight className="w-3 h-3 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform duration-300" strokeWidth={2.5} />
+                    </span>
+                  </div>
+                </div>
+              </Link>
             );
           })}
         </div>
 
-        {/* Professional Bottom Section - Mobile responsive */}
-        <div className="text-center mt-10 md:mt-12 lg:mt-16">
-          <div className="inline-flex items-center gap-3 md:gap-4 text-gray-500 text-sm md:text-base font-medium">
-            <div className="w-8 md:w-12 lg:w-16 h-px bg-gradient-to-r from-transparent via-gray-300 to-transparent"></div>
-            <div className="px-3 md:px-4 lg:px-6 py-2 md:py-3 bg-white/70 backdrop-blur-lg rounded-full border border-gray-200/50 shadow-lg">
-              <span className="bg-gradient-to-r from-emerald-600 to-blue-600 bg-clip-text text-transparent font-bold text-xs md:text-sm">
-                Empowering Kano State's Environmental Excellence
-              </span>
-            </div>
-            <div className="w-8 md:w-12 lg:w-16 h-px bg-gradient-to-l from-transparent via-gray-300 to-transparent"></div>
+
+        {/* Footer — official standards strip */}
+        <div className="mt-10 pt-6 border-t border-slate-900/10 grid grid-cols-1 md:grid-cols-3 gap-6 text-[11px]">
+          <div className="flex items-center gap-2 text-slate-600">
+            <span className="relative flex h-2 w-2">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
+            </span>
+            <span className="font-mono tracking-[0.15em] uppercase">All systems operational</span>
           </div>
+          <div className="font-mono tracking-[0.18em] uppercase text-slate-400 md:text-center">
+            ISO 14001 · WHO AQG · SDG 6 · 11 · 13 · 15
+          </div>
+          <Link
+            to="/resources"
+            className="inline-flex items-center justify-start md:justify-end gap-1.5 font-semibold tracking-[0.18em] uppercase text-kano-primary hover:gap-2.5 transition-all text-[10.5px]"
+          >
+            Full service directory <ArrowUpRight className="w-3.5 h-3.5" strokeWidth={2.5} />
+          </Link>
         </div>
       </div>
-      
-      <style>{`
-        .bg-grid-pattern {
-          background-image: radial-gradient(circle, #00000008 1px, transparent 1px);
-          background-size: 30px 30px;
-        }
-        
-        @keyframes fade-in {
-          0% {
-            opacity: 0;
-            transform: translateY(20px);
-          }
-          100% {
-            opacity: 1;
-            transform: translateY(0);
-          }
-        }
-      `}</style>
     </section>
   );
 };

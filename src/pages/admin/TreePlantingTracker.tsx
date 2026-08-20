@@ -1,6 +1,7 @@
 // @ts-nocheck
 import React, { useEffect, useState } from 'react';
 import AdminLayout from '@/components/admin/AdminLayout';
+import AdminPageHeader from '@/components/admin/AdminPageHeader';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -95,19 +96,13 @@ const TreePlantingTracker = () => {
 
   return (
     <AdminLayout>
-      <div className="bg-gradient-to-r from-emerald-50 to-teal-50 border border-emerald-200 rounded-xl p-6 mb-6">
-        <div className="flex items-center justify-between gap-4 flex-wrap">
-          <div className="flex items-center gap-4">
-            <div className="p-3 bg-gradient-to-br from-emerald-600 to-emerald-800 rounded-xl shadow-lg">
-              <TreePine className="w-8 h-8 text-white" />
-            </div>
-            <div>
-              <h1 className="text-3xl font-bold mb-1">Planting Tracker</h1>
-              <p className="text-muted-foreground">Every tree planted by approved organisations — logged with location, species and survival rate</p>
-            </div>
-          </div>
-          <Button onClick={() => setOpen(true)} className="bg-emerald-700 hover:bg-emerald-800"><Plus className="w-4 h-4 mr-1" /> Log Planting</Button>
-        </div>
+      <div className="mb-6">
+        <AdminPageHeader
+          title="Planting Tracker"
+          description="Every tree planted by approved organisations — logged with location, species and survival rate."
+          breadcrumb={[{ label: 'Admin', to: '/admin/dashboard' }, { label: 'Planting Tracker' }]}
+          actions={<Button onClick={() => setOpen(true)}><Plus className="w-4 h-4 mr-1" /> Log Planting</Button>}
+        />
       </div>
 
       <div className="grid gap-4 md:grid-cols-4 mb-6">

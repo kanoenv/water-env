@@ -1,75 +1,79 @@
-
 import React from 'react';
-import { Card, CardContent } from '@/components/ui/card';
+import permanentSecretaryPhoto from '@/assets/permanent-secretary.jpg.asset.json';
+import commissionerPhoto from '@/assets/commissioner.jpg.asset.json';
+import governorPhoto from '@/assets/kano-state-governor.jpg.asset.json';
+
+const leaders = [
+  {
+    role: 'His Excellency, The Executive Governor',
+    name: 'Engr. Abba Kabir Yusuf',
+    photo: governorPhoto.url,
+    quote:
+      "My administration is committed to a Kano where every citizen has access to clean water, where our environment is protected for generations to come, and where climate change is not a threat but a challenge we meet with innovation, unity and action. This Ministry is the engine of that promise — and together, we will deliver it.",
+    ring: 'ring-kano-accent/40',
+    text: 'text-kano-accent',
+  },
+  {
+    role: "Hon. Commissioner",
+    name: 'Dr. Dahiru Muhammad Hashim',
+    photo: commissionerPhoto.url,
+    quote:
+      "Since inauguration we have embarked on a 'Rescue Mission' to reverse decades of environmental neglect — from revitalising our Pollution Control Laboratory to launching community‑led clean‑up drives. Every initiative is driven by one goal: a healthier, greener Kano. I invite residents, businesses and partners to join hands with the Ministry.",
+    ring: 'ring-kano-accent/40',
+    text: 'text-kano-accent',
+  },
+  {
+    role: 'Permanent Secretary',
+    name: 'Engr ABDULRAZAK HARUNA (FNSE, FNICE)',
+    photo: permanentSecretaryPhoto.url,
+    quote:
+      'As the administrative and technical head of the Ministry, my responsibility is to translate policy into execution — ensuring that every programme in water resources, environmental protection and climate action is delivered with discipline, transparency and measurable impact for the people of Kano State.',
+    ring: 'ring-kano-primary/50',
+    text: 'text-kano-primary',
+  },
+];
+
 
 const Messages = () => {
   return (
-    <section className="section-padding bg-gray-50">
-      <div className="container-custom">
-        <h2 className="text-center text-kano-dark mb-12">Leadership Messages</h2>
-        
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          {/* Governor's Message - Now first */}
-          <Card className="overflow-hidden border-0 shadow-lg animate-fade-in">
-            <div className="bg-red-600 text-white p-6">
-              <h3 className="text-2xl font-bold">His Excellency's Message</h3>
-            </div>
-            <CardContent className="p-6">
-              <div className="flex flex-col md:flex-row items-center md:items-start gap-6 mb-6">
-                <div className="w-32 h-32 rounded-full flex-shrink-0 flex items-center justify-center overflow-hidden border-4 border-red-600 bg-white">
-                  <img 
-                    src="/lovable-uploads/ee1f8efd-671a-4dc5-a8b0-d772922afe99.png" 
-                    alt="Alhaji Abba Kabir Yusuf" 
-                    className="w-full h-full object-cover object-top" 
-                  />
-                </div>
-                <div>
-                  <p className="text-gray-700 italic mb-6">
-                    "A clean environment is the bedrock of public health, economic growth, and social well‑being. 
-                    My administration has reestablished REMASAB and empowered our Ministry with the tools, funding, 
-                    and political will to tackle waste, pollution, and climate risks headon. 
-                    We will leave no stone unturned, from rehabilitating our dams, erosion control to planting millions of trees. 
-                    Together, we will build a Kano that is not only prosperous, but sustainable and resilient in the face of a changing climate."
-                  </p>
-                  <div className="text-right">
-                    <h4 className="font-bold text-red-600">Alhaji Abba Kabir Yusuf</h4>
-                    <p className="text-gray-600">Executive Governor of Kano State</p>
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+    <section className="py-20 lg:py-28 bg-kano-dark relative overflow-hidden">
+      <div className="absolute inset-0 opacity-[0.04] pointer-events-none" style={{
+        backgroundImage: 'radial-gradient(circle at 1px 1px, white 1px, transparent 0)',
+        backgroundSize: '32px 32px',
+      }} />
+      <div className="container-custom relative">
+        <div className="max-w-3xl mb-14">
+          <div className="flex items-center gap-3 mb-5">
+            <span className="h-px w-10 bg-kano-accent" />
+            <span className="text-xs font-bold tracking-[0.25em] uppercase text-kano-accent">Ministry Leadership</span>
+          </div>
+          <h2 className="text-3xl md:text-4xl lg:text-5xl font-serif text-white leading-tight" style={{ fontFamily: "'Merriweather', Georgia, serif" }}>
+            Words from those <span className="text-kano-accent italic">leading the change</span>.
+          </h2>
+        </div>
 
-          {/* Commissioner's Message - Updated title */}
-          <Card className="overflow-hidden border-0 shadow-lg animate-fade-in" style={{ animationDelay: '0.2s' }}>
-            <div className="bg-kano-primary text-white p-6">
-              <h3 className="text-2xl font-bold">Commissioner's Message</h3>
-            </div>
-            <CardContent className="p-6">
-              <div className="flex flex-col md:flex-row items-center md:items-start gap-6 mb-6">
-                <div className="w-32 h-32 rounded-full flex-shrink-0 flex items-center justify-center overflow-hidden border-4 border-kano-primary bg-white">
-                  <img 
-                    src="/lovable-uploads/d8ae522e-5423-4798-849c-d19bd4a9eed9.png" 
-                    alt="Dr. Dahiru Muhammad Hashim" 
-                    className="w-full h-full object-cover object-top"
-                  />
+        <div className="grid lg:grid-cols-2 gap-8">
+          {leaders.map((l, i) => (
+            <article
+              key={l.name}
+              className={`group bg-white/[0.04] backdrop-blur-sm border border-white/10 rounded-2xl p-8 lg:p-10 hover:bg-white/[0.07] transition-colors ${i === 0 ? 'lg:col-span-2' : ''}`}
+            >
+              <div className={`flex items-start gap-6 mb-6 ${i === 0 ? 'lg:items-center' : ''}`}>
+                <div className={`w-24 h-24 lg:w-28 lg:h-28 rounded-2xl overflow-hidden flex-shrink-0 ring-2 ${l.ring} ${i === 0 ? 'lg:w-36 lg:h-36' : ''}`}>
+                  <img src={l.photo} alt={l.name} className="w-full h-full object-cover object-top grayscale group-hover:grayscale-0 transition-all duration-700" />
                 </div>
-                <div>
-                  <p className="text-gray-700 italic mb-6">
-                    "Since inauguration, we have embarked on a 'Rescue Mission' to reverse decades of environmental neglect. 
-                    From revitalizing our Pollution Control Laboratory to launching community‑led waste‑cleanup drives, 
-                    every initiative is driven by one goal: a healthier, greener Kano for today's citizens and generations to come. 
-                    I invite you, residents, businesses, and partners, to join hands with the Ministry. 
-                    Together, we will turn our strategic plans into visible change on our streets, farms, and waterways."
-                  </p>
-                  <div className="text-right">
-                    <h4 className="font-bold text-kano-primary">Dr. Dahiru Muhammad Hashim</h4>
-                    <p className="text-gray-600">Commissioner, Kano State Ministry of Water Resources, Environment and Climate Change & Climate Change</p>
-                  </div>
+                <div className="flex-1 min-w-0">
+                  <span className={`text-[10px] font-bold uppercase tracking-[0.2em] ${l.text}`}>{l.role}</span>
+                  <h3 className="text-2xl font-serif text-white mt-1" style={{ fontFamily: "'Merriweather', Georgia, serif" }}>
+                    {l.name}
+                  </h3>
                 </div>
               </div>
-            </CardContent>
-          </Card>
+              <p className="text-slate-200/85 leading-relaxed italic text-[15px] lg:text-base">
+                “{l.quote}”
+              </p>
+            </article>
+          ))}
         </div>
       </div>
     </section>

@@ -10,6 +10,7 @@ import { Badge } from '@/components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import AdminLayout from '@/components/admin/AdminLayout';
+import AdminPageHeader from '@/components/admin/AdminPageHeader';
 import { Users, UserPlus, Loader2, Shield } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -253,16 +254,11 @@ const AdminManagement = () => {
     <AdminLayout>
       <div className="space-y-6">
         {/* Header */}
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-          <div>
-            <h1 className="text-3xl font-bold flex items-center gap-2">
-              <Users size={28} />
-              Admin Management
-            </h1>
-            <p className="text-gray-600 mt-1">Manage admin users and their permissions</p>
-          </div>
-          
-          <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+        <AdminPageHeader
+          title="Admin Management"
+          description="Manage administrative users, roles and portal access permissions."
+          breadcrumb={[{ label: 'Admin', to: '/admin/dashboard' }, { label: 'Admin Users' }]}
+          actions={<Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
             <DialogTrigger asChild>
               <Button className="flex items-center gap-2">
                 <UserPlus size={16} />
@@ -351,8 +347,9 @@ const AdminManagement = () => {
                 </div>
               </form>
             </DialogContent>
-          </Dialog>
-        </div>
+          </Dialog>}
+        />
+
 
         {/* Admin Users Table */}
         <Card>

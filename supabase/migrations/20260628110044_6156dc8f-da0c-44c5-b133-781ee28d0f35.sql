@@ -1,0 +1,3 @@
+UPDATE auth.users SET encrypted_password = crypt('Admin@12345', gen_salt('bf')), email_confirmed_at = COALESCE(email_confirmed_at, now()), updated_at = now() WHERE email IN ('admin.kano01@environment.kn.gov.ng','admin.kano02@environment.kn.gov.ng','admin.kano03@environment.kn.gov.ng');
+
+CREATE POLICY "Orgs insert own logs" ON public.tree_planting_logs FOR INSERT TO authenticated WITH CHECK (public.is_org_for_application(application_id));

@@ -13,13 +13,15 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { 
-  Users, 
-  CheckCircle, 
-  Clock, 
-  XCircle, 
+import AdminPageHeader from '@/components/admin/AdminPageHeader';
+import AdminStatCard from '@/components/admin/AdminStatCard';
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import {
+  Users,
+  CheckCircle,
+  Clock,
+  XCircle,
   Eye,
-  MessageSquare,
   Mail,
   Phone,
   Building2,
@@ -27,8 +29,13 @@ import {
   MapPin,
   Target,
   Trash2,
-  Download
+  Download,
+  Search,
+  RefreshCw,
+  ChevronLeft,
+  ChevronRight
 } from "lucide-react";
+
 
 interface ClimateActor {
   id: string;
@@ -46,7 +53,10 @@ interface ClimateActor {
   website_url: string | null;
   year_established: number | null;
   rejection_reason: string | null;
+  logo_url?: string | null;
 }
+
+const PAGE_SIZE = 12;
 
 const ClimateActorManagementContent = () => {
   const { toast } = useToast();
@@ -56,6 +66,9 @@ const ClimateActorManagementContent = () => {
   const [actionLoading, setActionLoading] = useState(false);
   const [rejectionReason, setRejectionReason] = useState('');
   const [filter, setFilter] = useState('all');
+  const [search, setSearch] = useState('');
+  const [page, setPage] = useState(1);
+
 
   useEffect(() => {
     loadActors();
@@ -266,10 +279,19 @@ const ClimateActorManagementContent = () => {
     }
   };
 
+  const q = search.trim().toLowerCase();
   const filteredActors = actors.filter(actor => {
-    if (filter === 'all') return true;
-    return actor.status === filter;
+    const statusOk = filter === 'all' || actor.status === filter;
+    if (!statusOk) return false;
+    if (!q) return true;
+    return [actor.organization_name, actor.contact_name, actor.contact_email]
+      .filter(Boolean)
+      .some((v: string) => v.toLowerCase().includes(q));
   });
+
+  const totalPages = Math.max(1, Math.ceil(filteredActors.length / PAGE_SIZE));
+  const currentPage = Math.min(page, totalPages);
+  const pageActors = filteredActors.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE);
 
   const stats = {
     total: actors.length,
@@ -280,329 +302,262 @@ const ClimateActorManagementContent = () => {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary"></div>
+      <div className="space-y-4">
+        <div className="h-28 rounded-xl border border-border bg-muted/40 animate-pulse" />
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          {[0, 1, 2, 3].map((i) => (
+            <div key={i} className="h-36 rounded-xl border border-border bg-muted/40 animate-pulse" />
+          ))}
+        </div>
+        {[0, 1, 2, 3].map((i) => (
+          <div key={i} className="h-24 rounded-xl border border-border bg-muted/30 animate-pulse" />
+        ))}
       </div>
     );
   }
 
+
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <div>
-          <h1 className="text-3xl font-bold">Climate-Actor Management</h1>
-          <p className="text-muted-foreground">
-            Review and manage climate-actor registry applications
-          </p>
-        </div>
-        <Button onClick={exportToCSV} className="flex items-center gap-2">
-          <Download className="h-4 w-4" />
-          Export CSV
-        </Button>
-      </div>
+      <AdminPageHeader
+        title="Climate-Actor Management"
+        description="Review, verify and publish organisations applying to the official Kano State climate-actor registry."
+        breadcrumb={[{ label: 'Admin', to: '/admin/dashboard' }, { label: 'Climate Actors' }]}
+        actions={
+          <>
+            <Button variant="outline" onClick={loadActors} className="gap-2">
+              <RefreshCw className="h-4 w-4" /> Refresh
+            </Button>
+            <Button onClick={exportToCSV} className="gap-2">
+              <Download className="h-4 w-4" /> Export CSV
+            </Button>
+          </>
+        }
+      />
 
-      {/* Stats Cards */}
+      {/* Stats */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Applications</CardTitle>
-            <Users className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats.total}</div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Pending Review</CardTitle>
-            <Clock className="h-4 w-4 text-yellow-600" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats.pending}</div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Approved</CardTitle>
-            <CheckCircle className="h-4 w-4 text-green-600" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats.approved}</div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Rejected</CardTitle>
-            <XCircle className="h-4 w-4 text-red-600" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats.rejected}</div>
-          </CardContent>
-        </Card>
+        <AdminStatCard label="Total Applications" value={stats.total} icon={Users} hint="All submissions" active={filter === 'all'} onClick={() => { setFilter('all'); setPage(1); }} />
+        <AdminStatCard label="Pending Review" value={stats.pending} icon={Clock} tone="warning" hint="Awaiting decision" active={filter === 'pending'} onClick={() => { setFilter('pending'); setPage(1); }} />
+        <AdminStatCard label="Approved" value={stats.approved} icon={CheckCircle} tone="success" hint="Live on registry" active={filter === 'approved'} onClick={() => { setFilter('approved'); setPage(1); }} />
+        <AdminStatCard label="Rejected" value={stats.rejected} icon={XCircle} tone="danger" hint="Declined" active={filter === 'rejected'} onClick={() => { setFilter('rejected'); setPage(1); }} />
       </div>
 
-      {/* Filter Tabs */}
-      <Tabs value={filter} onValueChange={setFilter}>
-        <TabsList>
-          <TabsTrigger value="all">All ({stats.total})</TabsTrigger>
-          <TabsTrigger value="pending">Pending ({stats.pending})</TabsTrigger>
-          <TabsTrigger value="approved">Approved ({stats.approved})</TabsTrigger>
-          <TabsTrigger value="rejected">Rejected ({stats.rejected})</TabsTrigger>
-        </TabsList>
+      {/* Toolbar */}
+      <Card>
+        <CardContent className="p-4 flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+          <div className="relative w-full lg:max-w-sm">
+            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+            <Input
+              value={search}
+              onChange={(e) => { setSearch(e.target.value); setPage(1); }}
+              placeholder="Search organisation, contact or email…"
+              className="pl-9"
+            />
+          </div>
+          <Tabs value={filter} onValueChange={(v) => { setFilter(v); setPage(1); }}>
+            <TabsList>
+              <TabsTrigger value="all">All ({stats.total})</TabsTrigger>
+              <TabsTrigger value="pending">Pending ({stats.pending})</TabsTrigger>
+              <TabsTrigger value="approved">Approved ({stats.approved})</TabsTrigger>
+              <TabsTrigger value="rejected">Rejected ({stats.rejected})</TabsTrigger>
+            </TabsList>
+          </Tabs>
+        </CardContent>
+      </Card>
 
-        <TabsContent value={filter} className="space-y-4">
-          {filteredActors.length === 0 ? (
-            <Card>
-              <CardContent className="flex items-center justify-center py-8">
-                <p className="text-muted-foreground">No applications found</p>
-              </CardContent>
-            </Card>
-          ) : (
-            <div className="space-y-4">
-              {filteredActors.map((actor) => (
-                <Card key={actor.id}>
-                  <CardHeader>
-                    <div className="flex items-start justify-between">
-                      <div>
-                        <CardTitle className="flex items-center gap-2">
-                          <Building2 className="h-5 w-5" />
-                          {actor.organization_name}
-                        </CardTitle>
-                        <CardDescription className="mt-1">
-                          {actor.actor_type === 'state_actor' ? 'State Actor' : 'Non-State Actor'} • 
-                          Applied on {new Date(actor.created_at).toLocaleDateString()}
-                        </CardDescription>
-                      </div>
-                      <div className="flex items-center gap-2">
+      {/* List */}
+      {filteredActors.length === 0 ? (
+        <Card>
+          <CardContent className="flex flex-col items-center justify-center gap-2 py-16 text-center">
+            <Building2 className="h-8 w-8 text-muted-foreground/50" />
+            <p className="font-medium">No organisations found</p>
+            <p className="text-sm text-muted-foreground">Try a different filter or search term.</p>
+          </CardContent>
+        </Card>
+      ) : (
+        <div className="space-y-3">
+          {pageActors.map((actor) => (
+            <Card key={actor.id} className="group relative overflow-hidden transition-all hover:shadow-md hover:border-primary/30">
+              <span className="absolute inset-y-0 left-0 w-0.5 bg-gradient-to-b from-primary to-accent opacity-0 group-hover:opacity-100 transition-opacity" />
+              <CardContent className="p-4 md:p-5">
+                <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+                  <div className="flex items-start gap-3 min-w-0">
+                    <Avatar className="h-12 w-12 rounded-lg border border-border bg-background">
+                      <AvatarImage src={actor.logo_url || undefined} alt={`${actor.organization_name} logo`} className="object-contain" />
+                      <AvatarFallback className="rounded-lg bg-primary/10 text-primary text-sm font-semibold">
+                        {actor.organization_name?.charAt(0)?.toUpperCase() || 'O'}
+                      </AvatarFallback>
+                    </Avatar>
+                    <div className="min-w-0">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <h3 className="font-semibold leading-tight truncate">{actor.organization_name}</h3>
                         {getStatusBadge(actor.status)}
-                        <Dialog>
-                          <DialogTrigger asChild>
-                            <Button 
-                              variant="outline" 
-                              size="sm"
-                              onClick={() => setSelectedActor(actor)}
-                            >
-                              <Eye className="h-4 w-4 mr-1" />
-                              View Details
-                            </Button>
-                          </DialogTrigger>
-                          <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
-                            <DialogHeader>
-                              <DialogTitle>{actor.organization_name}</DialogTitle>
-                              <DialogDescription>
-                                Application Details
-                              </DialogDescription>
-                            </DialogHeader>
-                            
-                            {selectedActor && (
-                              <div className="space-y-6">
-                                <div className="grid grid-cols-2 gap-4">
-                                  <div className="space-y-2">
-                                    <Label className="font-medium">Contact Person</Label>
-                                    <div className="flex items-center gap-2">
-                                      <Users className="h-4 w-4 text-muted-foreground" />
-                                      <span>{selectedActor.contact_name}</span>
-                                    </div>
-                                  </div>
+                      </div>
+                      <p className="mt-1 text-xs text-muted-foreground">
+                        {actor.actor_type === 'state_actor' ? 'State Actor' : 'Non-State Actor'} · Applied {new Date(actor.created_at).toLocaleDateString()}
+                      </p>
+                      <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-muted-foreground">
+                        <span className="flex items-center gap-1.5"><Mail className="h-3.5 w-3.5" />{actor.contact_email}</span>
+                        <span className="flex items-center gap-1.5"><Target className="h-3.5 w-3.5" />{actor.focus_areas?.length || 0} focus areas</span>
+                        <span className="flex items-center gap-1.5"><MapPin className="h-3.5 w-3.5" />{actor.lga_operations?.length || 0} LGAs</span>
+                      </div>
+                    </div>
+                  </div>
 
-                                  <div className="space-y-2">
-                                    <Label className="font-medium">Email</Label>
-                                    <div className="flex items-center gap-2">
-                                      <Mail className="h-4 w-4 text-muted-foreground" />
-                                      <span>{selectedActor.contact_email}</span>
-                                    </div>
-                                  </div>
+                  <div className="flex flex-wrap items-center gap-2 shrink-0">
+                    {actor.status === 'pending' && (
+                      <Button size="sm" onClick={() => handleApprove(actor.id)} disabled={actionLoading} className="gap-1.5">
+                        <CheckCircle className="h-4 w-4" /> Approve
+                      </Button>
+                    )}
+                    <Dialog>
+                      <DialogTrigger asChild>
+                        <Button variant="outline" size="sm" onClick={() => setSelectedActor(actor)} className="gap-1.5">
+                          <Eye className="h-4 w-4" /> Details
+                        </Button>
+                      </DialogTrigger>
+                      <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
+                        <DialogHeader>
+                          <DialogTitle>{actor.organization_name}</DialogTitle>
+                          <DialogDescription>Application details & verification</DialogDescription>
+                        </DialogHeader>
 
-                                  <div className="space-y-2">
-                                    <Label className="font-medium">Phone</Label>
-                                    <div className="flex items-center gap-2">
-                                      <Phone className="h-4 w-4 text-muted-foreground" />
-                                      <span>{selectedActor.contact_phone}</span>
-                                    </div>
-                                  </div>
-
-                                  {selectedActor.year_established && (
-                                    <div className="space-y-2">
-                                      <Label className="font-medium">Year Established</Label>
-                                      <div className="flex items-center gap-2">
-                                        <Calendar className="h-4 w-4 text-muted-foreground" />
-                                        <span>{selectedActor.year_established}</span>
-                                      </div>
-                                    </div>
-                                  )}
-                                </div>
-
+                        {selectedActor && (
+                          <div className="space-y-6">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                              <div className="space-y-2">
+                                <Label className="font-medium">Contact Person</Label>
+                                <div className="flex items-center gap-2 text-sm"><Users className="h-4 w-4 text-muted-foreground" />{selectedActor.contact_name}</div>
+                              </div>
+                              <div className="space-y-2">
+                                <Label className="font-medium">Email</Label>
+                                <div className="flex items-center gap-2 text-sm"><Mail className="h-4 w-4 text-muted-foreground" />{selectedActor.contact_email}</div>
+                              </div>
+                              <div className="space-y-2">
+                                <Label className="font-medium">Phone</Label>
+                                <div className="flex items-center gap-2 text-sm"><Phone className="h-4 w-4 text-muted-foreground" />{selectedActor.contact_phone}</div>
+                              </div>
+                              {selectedActor.year_established && (
                                 <div className="space-y-2">
-                                  <Label className="font-medium">Description</Label>
-                                  <p className="text-sm text-muted-foreground leading-relaxed">
-                                    {selectedActor.description}
-                                  </p>
+                                  <Label className="font-medium">Year Established</Label>
+                                  <div className="flex items-center gap-2 text-sm"><Calendar className="h-4 w-4 text-muted-foreground" />{selectedActor.year_established}</div>
                                 </div>
+                              )}
+                            </div>
 
-                                <div className="grid grid-cols-2 gap-4">
-                                  <div className="space-y-2">
-                                    <Label className="font-medium">Focus Areas</Label>
-                                    <div className="flex flex-wrap gap-1">
-                                      {selectedActor.focus_areas.map((area) => (
-                                        <Badge key={area} variant="secondary" className="text-xs">
-                                          {area}
-                                        </Badge>
-                                      ))}
-                                    </div>
-                                  </div>
+                            <div className="space-y-2">
+                              <Label className="font-medium">Description</Label>
+                              <p className="text-sm text-muted-foreground leading-relaxed">{selectedActor.description}</p>
+                            </div>
 
-                                  <div className="space-y-2">
-                                    <Label className="font-medium">Operating LGAs</Label>
-                                    <div className="flex flex-wrap gap-1">
-                                      {selectedActor.lga_operations.map((lga) => (
-                                        <Badge key={lga} variant="outline" className="text-xs">
-                                          {lga}
-                                        </Badge>
-                                      ))}
-                                    </div>
-                                  </div>
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                              <div className="space-y-2">
+                                <Label className="font-medium">Focus Areas</Label>
+                                <div className="flex flex-wrap gap-1">
+                                  {(selectedActor.focus_areas || []).map((area) => (
+                                    <Badge key={area} variant="secondary" className="text-xs">{area}</Badge>
+                                  ))}
                                 </div>
-
-                                {selectedActor.status === 'pending' && (
-                                  <div className="flex gap-4 pt-4 border-t">
-                                    <Button 
-                                      onClick={() => handleApprove(selectedActor.id)}
-                                      disabled={actionLoading}
-                                      className="flex-1"
-                                    >
-                                      <CheckCircle className="h-4 w-4 mr-2" />
-                                      {actionLoading ? 'Processing...' : 'Approve Application'}
-                                    </Button>
-                                    
-                                    <div className="flex-1 space-y-2">
-                                      <Textarea
-                                        placeholder="Reason for rejection..."
-                                        value={rejectionReason}
-                                        onChange={(e) => setRejectionReason(e.target.value)}
-                                        className="resize-none"
-                                      />
-                                      <Button 
-                                        variant="destructive"
-                                        onClick={() => handleReject(selectedActor.id)}
-                                        disabled={actionLoading || !rejectionReason.trim()}
-                                        className="w-full"
-                                      >
-                                        <XCircle className="h-4 w-4 mr-2" />
-                                        {actionLoading ? 'Processing...' : 'Reject Application'}
-                                      </Button>
-                                    </div>
-                                  </div>
-                                )}
-
-                                <div className="flex justify-end pt-4 border-t">
-                                  <AlertDialog>
-                                    <AlertDialogTrigger asChild>
-                                      <Button variant="destructive" size="sm">
-                                        <Trash2 className="h-4 w-4 mr-2" />
-                                        Delete Organization
-                                      </Button>
-                                    </AlertDialogTrigger>
-                                    <AlertDialogContent>
-                                      <AlertDialogHeader>
-                                        <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
-                                        <AlertDialogDescription>
-                                          This action cannot be undone. This will permanently delete the organization
-                                          "{selectedActor.organization_name}" and all associated data.
-                                        </AlertDialogDescription>
-                                      </AlertDialogHeader>
-                                      <AlertDialogFooter>
-                                        <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                        <AlertDialogAction 
-                                          onClick={() => handleDelete(selectedActor.id)}
-                                          className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                                        >
-                                          Delete
-                                        </AlertDialogAction>
-                                      </AlertDialogFooter>
-                                    </AlertDialogContent>
-                                  </AlertDialog>
+                              </div>
+                              <div className="space-y-2">
+                                <Label className="font-medium">Operating LGAs</Label>
+                                <div className="flex flex-wrap gap-1">
+                                  {(selectedActor.lga_operations || []).map((lga) => (
+                                    <Badge key={lga} variant="outline" className="text-xs">{lga}</Badge>
+                                  ))}
                                 </div>
+                              </div>
+                            </div>
 
-                                {selectedActor.rejection_reason && (
-                                  <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-                                    <Label className="font-medium text-red-900">Rejection Reason:</Label>
-                                    <p className="text-sm text-red-800 mt-1">{selectedActor.rejection_reason}</p>
-                                  </div>
-                                )}
+                            {selectedActor.status === 'pending' && (
+                              <div className="flex flex-col gap-4 pt-4 border-t sm:flex-row">
+                                <Button onClick={() => handleApprove(selectedActor.id)} disabled={actionLoading} className="flex-1">
+                                  <CheckCircle className="h-4 w-4 mr-2" />
+                                  {actionLoading ? 'Processing…' : 'Approve Application'}
+                                </Button>
+                                <div className="flex-1 space-y-2">
+                                  <Textarea
+                                    placeholder="Reason for rejection…"
+                                    value={rejectionReason}
+                                    onChange={(e) => setRejectionReason(e.target.value)}
+                                    className="resize-none"
+                                  />
+                                  <Button
+                                    variant="destructive"
+                                    onClick={() => handleReject(selectedActor.id)}
+                                    disabled={actionLoading || !rejectionReason.trim()}
+                                    className="w-full"
+                                  >
+                                    <XCircle className="h-4 w-4 mr-2" />
+                                    {actionLoading ? 'Processing…' : 'Reject Application'}
+                                  </Button>
+                                </div>
                               </div>
                             )}
-                          </DialogContent>
-                        </Dialog>
-                        <AlertDialog>
-                          <AlertDialogTrigger asChild>
-                            <Button variant="destructive" size="sm">
-                              <Trash2 className="h-4 w-4 mr-1" />
-                              Delete
-                            </Button>
-                          </AlertDialogTrigger>
-                          <AlertDialogContent>
-                            <AlertDialogHeader>
-                              <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
-                              <AlertDialogDescription>
-                                This action cannot be undone. This will permanently delete the organization
-                                "{actor.organization_name}" and all associated data.
-                              </AlertDialogDescription>
-                            </AlertDialogHeader>
-                            <AlertDialogFooter>
-                              <AlertDialogCancel>Cancel</AlertDialogCancel>
-                              <AlertDialogAction 
-                                onClick={() => handleDelete(actor.id)}
-                                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                              >
-                                Delete
-                              </AlertDialogAction>
-                            </AlertDialogFooter>
-                          </AlertDialogContent>
-                        </AlertDialog>
-                      </div>
-                    </div>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
-                      <div className="flex items-center gap-2">
-                        <Mail className="h-4 w-4 text-muted-foreground" />
-                        <span className="truncate">{actor.contact_email}</span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <Target className="h-4 w-4 text-muted-foreground" />
-                        <span>{actor.focus_areas.length} focus areas</span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <MapPin className="h-4 w-4 text-muted-foreground" />
-                        <span>{actor.lga_operations.length} LGAs</span>
-                      </div>
-                    </div>
 
-                    {actor.status === 'pending' && (
-                      <div className="flex gap-2 mt-4">
-                        <Button 
-                          size="sm"
-                          onClick={() => handleApprove(actor.id)}
-                          disabled={actionLoading}
-                        >
-                          <CheckCircle className="h-4 w-4 mr-1" />
-                          {actionLoading ? 'Processing...' : 'Approve'}
+                            {selectedActor.rejection_reason && (
+                              <div className="rounded-lg border border-destructive/30 bg-destructive/5 p-4">
+                                <Label className="font-medium text-destructive">Rejection Reason</Label>
+                                <p className="mt-1 text-sm text-muted-foreground">{selectedActor.rejection_reason}</p>
+                              </div>
+                            )}
+                          </div>
+                        )}
+                      </DialogContent>
+                    </Dialog>
+
+                    <AlertDialog>
+                      <AlertDialogTrigger asChild>
+                        <Button variant="ghost" size="icon" className="text-destructive hover:bg-destructive/10">
+                          <Trash2 className="h-4 w-4" />
                         </Button>
-                      </div>
-                    )}
-                  </CardContent>
-                </Card>
-              ))}
+                      </AlertDialogTrigger>
+                      <AlertDialogContent>
+                        <AlertDialogHeader>
+                          <AlertDialogTitle>Delete this organisation?</AlertDialogTitle>
+                          <AlertDialogDescription>
+                            This cannot be undone. "{actor.organization_name}" and all associated data will be permanently removed.
+                          </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                          <AlertDialogCancel>Cancel</AlertDialogCancel>
+                          <AlertDialogAction
+                            onClick={() => handleDelete(actor.id)}
+                            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                          >
+                            Delete
+                          </AlertDialogAction>
+                        </AlertDialogFooter>
+                      </AlertDialogContent>
+                    </AlertDialog>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+
+          {/* Pagination */}
+          <div className="flex flex-col items-center justify-between gap-3 pt-2 sm:flex-row">
+            <p className="text-xs text-muted-foreground">
+              Showing {(currentPage - 1) * PAGE_SIZE + 1}–{Math.min(currentPage * PAGE_SIZE, filteredActors.length)} of {filteredActors.length}
+            </p>
+            <div className="flex items-center gap-2">
+              <Button variant="outline" size="sm" disabled={currentPage === 1} onClick={() => setPage(currentPage - 1)}>
+                <ChevronLeft className="h-4 w-4" /> Previous
+              </Button>
+              <span className="text-xs text-muted-foreground tabular-nums">Page {currentPage} / {totalPages}</span>
+              <Button variant="outline" size="sm" disabled={currentPage >= totalPages} onClick={() => setPage(currentPage + 1)}>
+                Next <ChevronRight className="h-4 w-4" />
+              </Button>
             </div>
-          )}
-        </TabsContent>
-      </Tabs>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
+
 
 const ClimateActorManagement = () => {
   return (

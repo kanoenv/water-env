@@ -1,30 +1,28 @@
 // @ts-nocheck
 
-import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import React, { useState, useEffect, useMemo } from 'react';
+import { useNavigate, Link } from 'react-router-dom';
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
-import { 
-  Search, 
-  Building2, 
-  MapPin, 
-  Globe, 
-  Users, 
-  CheckCircle, 
-  Clock, 
-  XCircle,
+import registryHeroAsset from "@/assets/hero/ministry-field-visit.jpg.asset.json";
+const registryHero = registryHeroAsset.url;
+
+import {
+  Search,
+  Building2,
+  MapPin,
+  Globe,
+  Users,
+  CheckCircle2,
   LogIn,
   Plus,
-  Eye,
-  UserPlus,
   Shield,
   BarChart3,
   Handshake,
@@ -39,649 +37,518 @@ import {
   AlertTriangle,
   Flame,
   Mail,
-  Phone
+  Phone,
+  Calendar,
+  ArrowRight,
+  SlidersHorizontal,
+  Home,
+  ChevronRight,
 } from "lucide-react";
 
-interface ClimateActor {
-  id: string;
-  actor_type: string;
-  organization_name: string;
-  focus_areas: string[];
-  year_established: number | null;
-  lga_operations: string[];
-  description: string;
-  contact_name: string;
-  contact_email: string;
-  contact_phone: string;
-  website_url: string | null;
-  logo_url: string | null;
-  status: string;
-  rejection_reason: string | null;
-  created_at: string;
-  updated_at: string;
-  approved_at: string | null;
-  approved_by: string | null;
-}
+
+const SELECT_COLS =
+  'id, actor_type, organization_name, focus_areas, year_established, lga_operations, description, contact_name, contact_email, contact_phone, website_url, logo_url, status, created_at, updated_at';
+
+const FOCUS_ICONS: Record<string, any> = {
+  'Renewable Energy': Zap,
+  'Climate-Smart Agriculture': Leaf,
+  'Waste Management': Recycle,
+  'Water & Sanitation': Droplets,
+  'Air-Quality Monitoring': Wind,
+  'Biodiversity Conservation': Trees,
+  'Green Finance': DollarSign,
+  'Climate Education & Advocacy': GraduationCap,
+  'Disaster Risk Reduction': AlertTriangle,
+  'Clean Cooking Solutions': Flame,
+};
+
+const PAGE_SIZE = 12;
 
 const ClimateActorRegistry = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [searchTerm, setSearchTerm] = useState('');
-  const [climateActors, setClimateActors] = useState<ClimateActor[]>([]);
+  const [typeFilter, setTypeFilter] = useState<'all' | 'state_actor' | 'non_state_actor'>('all');
+  const [focusFilter, setFocusFilter] = useState<string>('all');
+  const [page, setPage] = useState(1);
+  const [climateActors, setClimateActors] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetchClimateActors();
+    (async () => {
+      setLoading(true);
+      try {
+        const { data, error } = await supabase
+          .from('climate_actors')
+          .select(SELECT_COLS)
+          .order('created_at', { ascending: false });
+        if (error) throw error;
+        setClimateActors(data || []);
+      } catch {
+        toast({ title: "Error", description: "Failed to load registry", variant: "destructive" });
+      } finally {
+        setLoading(false);
+      }
+    })();
   }, []);
 
-  const fetchClimateActors = async () => {
-    setLoading(true);
-    try {
-      const { data, error } = await supabase
-        .from('climate_actors')
-        .select('*')
-        .order('created_at', { ascending: false });
+  const approved = useMemo(
+    () => climateActors.filter((a) => a.status === 'approved'),
+    [climateActors]
+  );
 
-      if (error) throw error;
+  const focusOptions = useMemo(() => {
+    const set = new Set<string>();
+    approved.forEach((a) => (a.focus_areas || []).forEach((f: string) => set.add(f)));
+    return Array.from(set).sort();
+  }, [approved]);
 
-      setClimateActors(data || []);
-    } catch (error: any) {
-      toast({
-        title: "Error",
-        description: "Failed to load climate actors",
-        variant: "destructive"
-      });
-    } finally {
-      setLoading(false);
-    }
+  const filtered = useMemo(() => {
+    const q = searchTerm.trim().toLowerCase();
+    return approved.filter((a) => {
+      if (typeFilter !== 'all' && a.actor_type !== typeFilter) return false;
+      if (focusFilter !== 'all' && !(a.focus_areas || []).includes(focusFilter)) return false;
+      if (!q) return true;
+      return (
+        (a.organization_name || '').toLowerCase().includes(q) ||
+        (a.description || '').toLowerCase().includes(q) ||
+        (a.lga_operations || []).join(' ').toLowerCase().includes(q) ||
+        (a.focus_areas || []).join(' ').toLowerCase().includes(q)
+      );
+    });
+  }, [approved, searchTerm, typeFilter, focusFilter]);
+
+  useEffect(() => { setPage(1); }, [searchTerm, typeFilter, focusFilter]);
+
+  const pageCount = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
+  const visible = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
+
+  const lgaCount = useMemo(() => {
+    const set = new Set<string>();
+    approved.forEach((a) => (a.lga_operations || []).forEach((l: string) => set.add(l)));
+    return set.size;
+  }, [approved]);
+
+  const stats = [
+    { label: 'Verified actors', value: approved.length, icon: CheckCircle2 },
+    { label: 'Focus areas covered', value: focusOptions.length, icon: Leaf },
+    { label: 'LGAs with presence', value: lgaCount, icon: MapPin },
+    { label: 'Total submissions', value: climateActors.length, icon: Building2 },
+  ];
+
+  const initials = (name: string) =>
+    (name || '?')
+      .split(' ')
+      .filter(Boolean)
+      .slice(0, 2)
+      .map((w) => w[0])
+      .join('')
+      .toUpperCase();
+
+  // Colour themes give every organisation card its own identity
+  const CARD_THEMES = [
+    { bar: 'from-emerald-500 to-teal-500', tint: 'from-emerald-50', ring: 'ring-emerald-200', avatar: 'bg-emerald-100 text-emerald-700', chip: 'bg-emerald-50 text-emerald-700 border-emerald-200', link: 'text-emerald-700' },
+    { bar: 'from-sky-500 to-blue-600', tint: 'from-sky-50', ring: 'ring-sky-200', avatar: 'bg-sky-100 text-sky-700', chip: 'bg-sky-50 text-sky-700 border-sky-200', link: 'text-sky-700' },
+    { bar: 'from-amber-400 to-orange-500', tint: 'from-amber-50', ring: 'ring-amber-200', avatar: 'bg-amber-100 text-amber-700', chip: 'bg-amber-50 text-amber-700 border-amber-200', link: 'text-amber-700' },
+    { bar: 'from-violet-500 to-fuchsia-500', tint: 'from-violet-50', ring: 'ring-violet-200', avatar: 'bg-violet-100 text-violet-700', chip: 'bg-violet-50 text-violet-700 border-violet-200', link: 'text-violet-700' },
+    { bar: 'from-rose-500 to-red-500', tint: 'from-rose-50', ring: 'ring-rose-200', avatar: 'bg-rose-100 text-rose-700', chip: 'bg-rose-50 text-rose-700 border-rose-200', link: 'text-rose-700' },
+    { bar: 'from-cyan-500 to-emerald-500', tint: 'from-cyan-50', ring: 'ring-cyan-200', avatar: 'bg-cyan-100 text-cyan-700', chip: 'bg-cyan-50 text-cyan-700 border-cyan-200', link: 'text-cyan-700' },
+  ];
+  const themeFor = (key: string) => {
+    let h = 0;
+    for (let i = 0; i < (key || '').length; i++) h = (h * 31 + key.charCodeAt(i)) % 997;
+    return CARD_THEMES[h % CARD_THEMES.length];
   };
 
-  const handleSearch = async () => {
-    if (!searchTerm.trim()) {
-      fetchClimateActors();
-      return;
-    }
-
-    setLoading(true);
-    try {
-      const { data, error } = await supabase
-        .from('climate_actors')
-        .select('*')
-        .or(`organization_name.ilike.%${searchTerm}%,description.ilike.%${searchTerm}%,contact_email.ilike.%${searchTerm}%`)
-        .order('created_at', { ascending: false });
-
-      if (error) throw error;
-
-      setClimateActors(data || []);
-    } catch (error: any) {
-      toast({
-        title: "Error",
-        description: "Failed to search climate actors",
-        variant: "destructive"
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const getStatusBadge = (status: string) => {
-    switch (status) {
-      case 'approved':
-        return <Badge className="bg-green-100 text-green-800"><CheckCircle className="h-3 w-3 mr-1" />Approved</Badge>;
-      case 'pending':
-        return <Badge className="bg-yellow-100 text-yellow-800"><Clock className="h-3 w-3 mr-1" />Pending</Badge>;
-      case 'rejected':
-        return <Badge className="bg-red-100 text-red-800"><XCircle className="h-3 w-3 mr-1" />Rejected</Badge>;
-      default:
-        return <Badge variant="secondary">{status}</Badge>;
-    }
-  };
-
-  const focusAreaIcons = {
-    'Renewable Energy': Zap,
-    'Climate-Smart Agriculture': Leaf,
-    'Waste Management': Recycle,
-    'Water & Sanitation': Droplets,
-    'Air-Quality Monitoring': Wind,
-    'Biodiversity Conservation': Trees,
-    'Green Finance': DollarSign,
-    'Climate Education & Advocacy': GraduationCap,
-    'Disaster Risk Reduction': AlertTriangle,
-    'Clean Cooking Solutions': Flame
-  };
-
-  const approvedActors = climateActors.filter(actor => actor.status === 'approved');
-
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary"></div>
-          <p className="mt-4 text-muted-foreground">Loading registry...</p>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
-      
-      {/* Hero Section */}
-      <div className="bg-gradient-to-br from-primary/5 via-background to-primary/10 border-b overflow-hidden">
-        <div className="container mx-auto px-4 py-12 md:py-16 lg:py-24">
-          <div className="flex flex-col lg:flex-row items-center justify-center text-center lg:text-left gap-6 lg:gap-8">
-            <div className="flex-shrink-0">
-              <img 
-                src="/lovable-uploads/6cf21747-c1c5-4ca9-b762-cc61e2cd3877.png" 
-                alt="Kano State Ministry of Water Resources, Environment and Climate Change" 
-                className="h-16 w-16 md:h-20 md:w-20 lg:h-24 lg:w-24 mx-auto lg:mx-0 rounded-full shadow-xl border-4 border-background/20"
-              />
-            </div>
-            <div className="flex-1 max-w-4xl">
-              <h1 className="text-2xl md:text-4xl lg:text-5xl xl:text-6xl font-bold text-foreground mb-3 leading-tight">
-                Kano State Climate-Actor Registry
-              </h1>
-              <p className="text-base md:text-lg lg:text-xl xl:text-2xl text-muted-foreground font-medium">
-                One directory, endless collaboration
-              </p>
-            </div>
-          </div>
-          
-          <div className="max-w-6xl mx-auto text-center space-y-6 md:space-y-8">
-            <p className="text-sm md:text-base lg:text-lg text-muted-foreground leading-relaxed max-w-4xl mx-auto px-4">
-              Welcome to the official online registry of climate-change stakeholders in Kano State. Here you can discover, connect with, and join the diverse network of government agencies, civil-society organisations, research groups, and private-sector innovators working toward a just, resilient, and low-carbon future for our state.
-            </p>
-            
-            <div className="bg-card/50 backdrop-blur-sm border border-primary/20 rounded-xl p-4 md:p-6 lg:p-8 shadow-lg mx-4 md:mx-8">
-              <p className="text-xl md:text-2xl lg:text-3xl font-bold text-primary mb-2">
-                Currently listed: {approvedActors.length} approved actors & counting
-              </p>
-              <p className="text-xs md:text-sm lg:text-base text-muted-foreground">
-                (updated weekly by the Ministry of Water Resources, Environment and Climate Change)
-              </p>
-            </div>
 
-            <div className="flex flex-col sm:flex-row gap-3 md:gap-4 justify-center pt-4 px-4">
-              <Button 
-                size="lg" 
-                className="flex items-center justify-center gap-2 md:gap-3 px-6 md:px-8 py-3 md:py-4 text-sm md:text-base font-medium rounded-xl hover:scale-105 transition-all duration-200 shadow-lg hover:shadow-xl"
-                onClick={() => {
-                  const registrySection = document.getElementById('registry-section');
-                  registrySection?.scrollIntoView({ behavior: 'smooth' });
-                }}
-              >
-                <Eye className="h-4 w-4 md:h-5 md:w-5" />
-                Browse Registry
-              </Button>
-              <Button 
-                size="lg" 
-                variant="outline"
-                className="flex items-center justify-center gap-2 md:gap-3 px-6 md:px-8 py-3 md:py-4 text-sm md:text-base font-medium rounded-xl hover:scale-105 transition-all duration-200 border-2 hover:bg-primary/5"
-                onClick={() => navigate('/climate-actor-register')}
-              >
-                <UserPlus className="h-4 w-4 md:h-5 md:w-5" />
-                Register Now
-              </Button>
-            </div>
+      {/* Hero banner — mirrors the home page banner treatment */}
+      <section className="relative overflow-hidden bg-kano-dark">
+        <img
+          src={registryHero}
+          alt="Climate actors working across Kano State"
+          className="absolute inset-0 h-full w-full object-cover"
+          loading="eager"
+        />
+        <div className="absolute inset-0 bg-gradient-to-r from-kano-dark/95 via-kano-dark/85 to-kano-dark/45" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_rgba(255,193,7,0.20),_transparent_55%)]" />
+
+        <div className="container-custom relative z-10 py-20 lg:py-28">
+          <nav className="flex items-center text-sm text-white/70 mb-6 flex-wrap gap-y-1">
+            <Link to="/" className="hover:text-kano-accent transition-colors flex items-center gap-1">
+              <Home className="w-3.5 h-3.5" /> Home
+            </Link>
+            <ChevronRight className="w-3.5 h-3.5 mx-2 text-white/40" />
+            <span className="text-white">Climate-Actor Registry</span>
+          </nav>
+
+          <div className="flex items-center gap-3 mb-5">
+            <span className="h-px w-10 bg-kano-accent" />
+            <span className="text-kano-accent uppercase tracking-[0.2em] text-xs font-semibold">
+              Official Public Directory
+            </span>
+          </div>
+
+          <h1
+            className="text-white text-4xl sm:text-5xl lg:text-6xl font-bold leading-tight tracking-tight max-w-4xl"
+            style={{ fontFamily: "'Merriweather', Georgia, serif" }}
+          >
+            Kano State <span className="text-kano-accent">Climate-Actor</span> Registry
+          </h1>
+          <p className="text-slate-200/90 text-base sm:text-lg lg:text-xl leading-relaxed max-w-2xl mt-5 font-light">
+            A verified directory of government agencies, civil-society organisations, research groups and
+            private-sector innovators driving a resilient, low-carbon Kano State.
+          </p>
+
+          <div className="flex flex-col sm:flex-row gap-3 mt-8">
+            <Button
+              size="lg"
+              onClick={() => navigate('/climate-actor-register')}
+              className="bg-kano-primary hover:bg-kano-primary/90 text-white gap-2 shadow-lg"
+            >
+              <Plus className="h-4 w-4" /> Register Organisation
+            </Button>
+            <Button
+              size="lg"
+              variant="outline"
+              onClick={() => navigate('/organization-login')}
+              className="border-white/40 bg-white/10 text-white hover:bg-white hover:text-kano-dark gap-2 backdrop-blur-sm"
+            >
+              <LogIn className="h-4 w-4" /> Organisation Login
+            </Button>
+          </div>
+
+          <div className="flex flex-wrap items-center gap-x-6 gap-y-2 mt-8 text-xs text-white/70">
+            <span className="inline-flex items-center gap-1.5">
+              <Shield className="h-3.5 w-3.5 text-kano-accent" /> Ministry-verified entries
+            </span>
+            <span className="inline-flex items-center gap-1.5">
+              <Users className="h-3.5 w-3.5 text-kano-accent" /> Open to all 44 LGAs
+            </span>
+            <span className="inline-flex items-center gap-1.5">
+              <CheckCircle2 className="h-3.5 w-3.5 text-kano-accent" /> Updated weekly
+            </span>
           </div>
         </div>
-      </div>
 
-      <div className="container mx-auto px-4 py-12 md:py-16 lg:py-20">
-        {/* Actions Section */}
-        <section className="mb-16 md:mb-20">
-          <div className="text-center mb-8 md:mb-12">
-            <h2 className="text-2xl md:text-3xl lg:text-4xl font-bold mb-3 md:mb-4">Actions you can take</h2>
-            <p className="text-base md:text-lg text-muted-foreground max-w-2xl mx-auto px-4">
-              Get started with our climate registry platform
-            </p>
-          </div>
-          <div className="grid md:grid-cols-2 gap-6 md:gap-8 max-w-4xl mx-auto">
-            <Card className="group hover:shadow-2xl transition-all duration-300 hover:-translate-y-2 border-2 hover:border-primary/20">
-              <CardHeader className="pb-4">
-                <div className="flex items-center gap-4">
-                  <div className="p-3 bg-primary/10 rounded-xl group-hover:bg-primary/20 transition-colors">
-                    <Search className="h-7 w-7 text-primary" />
-                  </div>
-                  <div>
-                    <CardTitle className="text-xl mb-2">Browse Registered Actors</CardTitle>
-                    <CardDescription className="text-base">
-                      Search by actor type, focus area, or LGA.
-                    </CardDescription>
-                  </div>
+        <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-kano-primary via-kano-accent to-kano-primary" />
+      </section>
+
+
+      {/* Stats strip */}
+      <section className="border-b border-border bg-card">
+        <div className="container-custom">
+          <div className="grid grid-cols-2 lg:grid-cols-4 divide-x divide-border/70">
+            {stats.map((s) => (
+              <div key={s.label} className="px-4 py-6 md:px-6 md:py-8">
+                <div className="flex items-center gap-2 text-muted-foreground text-[11px] uppercase tracking-[0.18em]">
+                  <s.icon className="h-3.5 w-3.5" /> {s.label}
                 </div>
-              </CardHeader>
-              <CardContent>
-                <Button 
-                  className="w-full py-3 text-base font-medium rounded-lg"
-                  onClick={() => {
-                    const registrySection = document.getElementById('registry-section');
-                    registrySection?.scrollIntoView({ behavior: 'smooth' });
-                  }}
-                >
-                  Browse Registry
-                </Button>
-              </CardContent>
-            </Card>
-
-            <Card className="group hover:shadow-2xl transition-all duration-300 hover:-translate-y-2 border-2 hover:border-primary/20">
-              <CardHeader className="pb-4">
-                <div className="flex items-center gap-4">
-                  <div className="p-3 bg-primary/10 rounded-xl group-hover:bg-primary/20 transition-colors">
-                    <Plus className="h-7 w-7 text-primary" />
-                  </div>
-                  <div>
-                    <CardTitle className="text-xl mb-2">Register Your Organisation</CardTitle>
-                    <CardDescription className="text-base">
-                      Add your details in minutes and await approval.
-                    </CardDescription>
-                  </div>
+                <div className="mt-2 text-3xl md:text-4xl font-semibold tabular-nums tracking-tight">
+                  {loading ? '—' : s.value.toLocaleString()}
                 </div>
-              </CardHeader>
-              <CardContent>
-                <Button 
-                  className="w-full py-3 text-base font-medium rounded-lg" 
-                  onClick={() => navigate('/climate-actor-register')}
-                >
-                  Register Now
-                </Button>
-              </CardContent>
-            </Card>
-          </div>
-        </section>
-
-        {/* Why Register Section */}
-        <section className="mb-16 md:mb-20">
-          <div className="text-center mb-8 md:mb-12">
-            <h2 className="text-2xl md:text-3xl lg:text-4xl font-bold mb-3 md:mb-4">Why register?</h2>
-            <p className="text-base md:text-lg text-muted-foreground max-w-2xl mx-auto px-4">
-              Unlock the benefits of being part of our climate action network
-            </p>
-          </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 lg:gap-8">
-            <Card className="text-center group hover:shadow-xl transition-all duration-300 hover:-translate-y-1 border-0 bg-gradient-to-br from-background to-primary/5">
-              <CardHeader className="pb-6">
-                <div className="mx-auto mb-4 p-4 bg-primary/10 rounded-2xl w-fit group-hover:bg-primary/20 transition-colors">
-                  <Shield className="h-10 w-10 text-primary" />
-                </div>
-                <CardTitle className="text-lg lg:text-xl">Visibility & Credibility</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-sm lg:text-base text-muted-foreground leading-relaxed">
-                  Appear in an official, publicly accessible directory.
-                </p>
-              </CardContent>
-            </Card>
-
-            <Card className="text-center group hover:shadow-xl transition-all duration-300 hover:-translate-y-1 border-0 bg-gradient-to-br from-background to-primary/5">
-              <CardHeader className="pb-6">
-                <div className="mx-auto mb-4 p-4 bg-primary/10 rounded-2xl w-fit group-hover:bg-primary/20 transition-colors">
-                  <Handshake className="h-10 w-10 text-primary" />
-                </div>
-                <CardTitle className="text-lg lg:text-xl">Collaboration Opportunities</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-sm lg:text-base text-muted-foreground leading-relaxed">
-                  Find partners for projects, grants, and research.
-                </p>
-              </CardContent>
-            </Card>
-
-            <Card className="text-center group hover:shadow-xl transition-all duration-300 hover:-translate-y-1 border-0 bg-gradient-to-br from-background to-primary/5">
-              <CardHeader className="pb-6">
-                <div className="mx-auto mb-4 p-4 bg-primary/10 rounded-2xl w-fit group-hover:bg-primary/20 transition-colors">
-                  <Users className="h-10 w-10 text-primary" />
-                </div>
-                <CardTitle className="text-lg lg:text-xl">Policy Influence</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-sm lg:text-base text-muted-foreground leading-relaxed">
-                  Receive invitations to stakeholder consultations and working groups.
-                </p>
-              </CardContent>
-            </Card>
-
-            <Card className="text-center group hover:shadow-xl transition-all duration-300 hover:-translate-y-1 border-0 bg-gradient-to-br from-background to-primary/5">
-              <CardHeader className="pb-6">
-                <div className="mx-auto mb-4 p-4 bg-primary/10 rounded-2xl w-fit group-hover:bg-primary/20 transition-colors">
-                  <BarChart3 className="h-10 w-10 text-primary" />
-                </div>
-                <CardTitle className="text-lg lg:text-xl">Data-driven Insights</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-sm lg:text-base text-muted-foreground leading-relaxed">
-                  Access aggregated climate-action metrics for Kano State.
-                </p>
-              </CardContent>
-            </Card>
-          </div>
-        </section>
-
-        {/* Who Can Register Section */}
-        <section className="mb-16 md:mb-20">
-          <div className="text-center mb-8 md:mb-12">
-            <h2 className="text-2xl md:text-3xl lg:text-4xl font-bold mb-3 md:mb-4">Who can register?</h2>
-            <p className="text-base md:text-lg text-muted-foreground max-w-2xl mx-auto px-4">
-              We welcome diverse climate stakeholders across sectors
-            </p>
-          </div>
-          <div className="grid md:grid-cols-2 gap-6 md:gap-8 max-w-5xl mx-auto">
-            <Card className="group hover:shadow-xl transition-all duration-300 hover:-translate-y-1 border-2 hover:border-primary/30">
-              <CardHeader className="pb-6">
-                <CardTitle className="flex items-center gap-3 text-xl lg:text-2xl">
-                  <div className="p-2 bg-primary/10 rounded-lg group-hover:bg-primary/20 transition-colors">
-                    <Building2 className="h-6 w-6 text-primary" />
-                  </div>
-                  State Actors
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-base text-muted-foreground leading-relaxed">
-                  Ministries, Departments & Agencies (MDAs), Local Government Councils, public research institutes
-                </p>
-              </CardContent>
-            </Card>
-
-            <Card className="group hover:shadow-xl transition-all duration-300 hover:-translate-y-1 border-2 hover:border-primary/30">
-              <CardHeader className="pb-6">
-                <CardTitle className="flex items-center gap-3 text-xl lg:text-2xl">
-                  <div className="p-2 bg-primary/10 rounded-lg group-hover:bg-primary/20 transition-colors">
-                    <Users className="h-6 w-6 text-primary" />
-                  </div>
-                  Non-State Actors
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-base text-muted-foreground leading-relaxed">
-                  NGOs/CSOs, youth and women's groups, private companies, academic labs, professional associations
-                </p>
-              </CardContent>
-            </Card>
-          </div>
-          
-          <div className="text-center mt-6 md:mt-8">
-            <div className="bg-primary/5 border border-primary/20 rounded-xl p-4 md:p-6 max-w-4xl mx-auto">
-              <p className="text-sm md:text-base lg:text-lg text-muted-foreground leading-relaxed">
-                <strong className="text-foreground">Minimum criteria:</strong> operate (or plan to operate) within Kano State, have a verifiable contact, and focus on at least one climate- or environment-related area.
-              </p>
-            </div>
-          </div>
-        </section>
-
-        {/* Focus Areas Section */}
-        <section className="mb-12 md:mb-16">
-          <h2 className="text-xl md:text-2xl lg:text-3xl font-bold text-center mb-6 md:mb-8">Focus areas you can tag</h2>
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 md:gap-4 max-w-6xl mx-auto">
-            {Object.entries(focusAreaIcons).map(([area, Icon]) => (
-              <Card key={area} className="text-center p-3 md:p-4 hover:shadow-md transition-shadow group hover:scale-105 duration-200">
-                <Icon className="h-6 w-6 md:h-8 md:w-8 mx-auto text-primary mb-2 group-hover:text-primary/80 transition-colors" />
-                <p className="text-xs md:text-sm font-medium leading-tight">{area}</p>
-              </Card>
+              </div>
             ))}
           </div>
-          <p className="text-center text-sm text-muted-foreground mt-4">
-            (select all that apply when registering)
-          </p>
-        </section>
+        </div>
+      </section>
 
-        {/* How Process Works Section */}
-        <section className="mb-12 md:mb-16">
-          <h2 className="text-2xl md:text-3xl font-bold text-center mb-8">How the process works</h2>
-          <div className="grid md:grid-cols-3 gap-6 md:gap-8 max-w-4xl mx-auto">
-            <Card className="text-center">
-              <CardHeader>
-                <div className="w-12 h-12 bg-primary text-primary-foreground rounded-full flex items-center justify-center mx-auto mb-4 text-xl font-bold">
-                  1
-                </div>
-                <CardTitle>Submit the form</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-sm text-muted-foreground">
-                  Provide basic organisation details, contacts, and focus areas.
-                </p>
-              </CardContent>
-            </Card>
-
-            <Card className="text-center">
-              <CardHeader>
-                <div className="w-12 h-12 bg-primary text-primary-foreground rounded-full flex items-center justify-center mx-auto mb-4 text-xl font-bold">
-                  2
-                </div>
-                <CardTitle>Verification</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-sm text-muted-foreground">
-                  Our team reviews submissions within 5 working days.
-                </p>
-              </CardContent>
-            </Card>
-
-            <Card className="text-center">
-              <CardHeader>
-                <div className="w-12 h-12 bg-primary text-primary-foreground rounded-full flex items-center justify-center mx-auto mb-4 text-xl font-bold">
-                  3
-                </div>
-                <CardTitle>Approval & listing</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-sm text-muted-foreground">
-                  Approved actors appear publicly; rejected actors receive feedback.
-                </p>
-              </CardContent>
-            </Card>
-          </div>
-        </section>
-
-        {/* Registry Section */}
-        <section id="registry-section" className="mb-12 md:mb-16">
-          <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4 mb-8">
+      {/* Directory */}
+      <section id="registry-section" className="py-14 md:py-20">
+        <div className="container-custom">
+          <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-5 border-b border-border pb-6 mb-8">
             <div>
-              <h2 className="text-2xl md:text-3xl font-bold text-primary mb-2">
-                Registered Organizations
-              </h2>
-              <p className="text-muted-foreground">
-                Browse our directory of climate actors in Kano State
+              <div className="text-[11px] uppercase tracking-[0.22em] text-muted-foreground mb-2">
+                Section 01 — Registered Organisations
+              </div>
+              <h2 className="text-2xl md:text-3xl font-semibold tracking-tight">The Directory</h2>
+              <p className="text-sm text-muted-foreground mt-1">
+                Verified weekly by the Ministry of Water Resources, Environment and Climate Change.
               </p>
             </div>
-            <div className="flex flex-col sm:flex-row gap-3 w-full lg:w-auto">
-              <Button 
-                onClick={() => navigate('/organization-login')}
-                variant="outline"
-                className="flex items-center justify-center gap-2 w-full sm:w-auto"
-              >
-                <LogIn className="h-4 w-4" />
-                Organization Login
+            <div className="flex flex-col sm:flex-row gap-3">
+              <Button variant="outline" onClick={() => navigate('/organization-login')} className="gap-2">
+                <LogIn className="h-4 w-4" /> Organisation Login
               </Button>
-              <Button 
-                onClick={() => navigate('/climate-actor-register')}
-                className="flex items-center justify-center gap-2 w-full sm:w-auto"
-              >
-                <Plus className="h-4 w-4" />
-                Register Organization
+              <Button onClick={() => navigate('/climate-actor-register')} className="gap-2">
+                <Plus className="h-4 w-4" /> Register Organisation
               </Button>
             </div>
           </div>
 
-          {/* Search Section */}
-          <Card className="mb-8">
-            <CardContent className="p-6">
-              <div className="flex flex-col sm:flex-row gap-4">
-                <div className="flex-1">
-                  <Label htmlFor="search" className="sr-only">Search organizations</Label>
-                  <div className="relative">
-                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
-                    <Input
-                      id="search"
-                      type="text"
-                      placeholder="Search by organization name, description, or email..."
-                      value={searchTerm}
-                      onChange={(e) => setSearchTerm(e.target.value)}
-                      className="pl-10"
-                      onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
-                    />
-                  </div>
-                </div>
-                <Button onClick={handleSearch} className="sm:w-auto w-full">
-                  <Search className="h-4 w-4 mr-2" />
-                  Search
-                </Button>
+          {/* Filter bar */}
+          <Card className="mb-8 border-border">
+            <CardContent className="p-4 md:p-5 space-y-4">
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input
+                  placeholder="Search by organisation, focus area or local government area…"
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="pl-10 h-11"
+                />
+              </div>
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="flex items-center gap-1.5 text-[11px] uppercase tracking-[0.18em] text-muted-foreground mr-1">
+                  <SlidersHorizontal className="h-3.5 w-3.5" /> Filter
+                </span>
+                {[
+                  { k: 'all', l: 'All actors' },
+                  { k: 'state_actor', l: 'State actors' },
+                  { k: 'non_state_actor', l: 'Non-state actors' },
+                ].map((t) => (
+                  <button
+                    key={t.k}
+                    onClick={() => setTypeFilter(t.k as any)}
+                    className={`text-xs font-medium px-3 py-1.5 rounded-full border transition-colors ${
+                      typeFilter === t.k
+                        ? 'bg-primary text-primary-foreground border-primary'
+                        : 'border-border text-muted-foreground hover:border-primary/40 hover:text-foreground'
+                    }`}
+                  >
+                    {t.l}
+                  </button>
+                ))}
+                <span className="mx-1 hidden md:inline h-4 w-px bg-border" />
+                <select
+                  value={focusFilter}
+                  onChange={(e) => setFocusFilter(e.target.value)}
+                  className="text-xs bg-background border border-border rounded-full px-3 py-1.5 text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+                >
+                  <option value="all">All focus areas</option>
+                  {focusOptions.map((f) => (
+                    <option key={f} value={f}>{f}</option>
+                  ))}
+                </select>
               </div>
             </CardContent>
           </Card>
 
-          {/* Results Summary */}
-          <div className="mb-6">
-            <p className="text-sm text-muted-foreground">
-              Showing {approvedActors.length} approved organization{approvedActors.length !== 1 ? 's' : ''}
-              {searchTerm && ` matching "${searchTerm}"`}
-            </p>
+          <div className="flex items-center justify-between mb-5 text-sm text-muted-foreground">
+            <span>
+              {loading ? 'Loading registry…' : `${filtered.length.toLocaleString()} verified organisation${filtered.length !== 1 ? 's' : ''}`}
+            </span>
+            {!loading && pageCount > 1 && <span className="tabular-nums">Page {page} of {pageCount}</span>}
           </div>
 
-          {/* Organizations Grid */}
-          {approvedActors.length === 0 ? (
-            <Card className="text-center py-12">
+          {loading ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
+              {Array.from({ length: 6 }).map((_, i) => (
+                <div key={i} className="h-56 rounded-lg border border-border bg-muted/40 animate-pulse" />
+              ))}
+            </div>
+          ) : filtered.length === 0 ? (
+            <Card className="text-center py-16">
               <CardContent>
-                <Building2 className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-                <h3 className="text-lg font-semibold mb-2">No approved organizations found</h3>
-                <p className="text-muted-foreground mb-4">
-                  {searchTerm 
-                    ? "Try adjusting your search terms or browse all organizations."
-                    : "Be the first to register your organization!"
-                  }
-                </p>
-                <Button onClick={() => navigate('/climate-actor-register')}>
-                  Register Your Organization
+                <Building2 className="h-10 w-10 mx-auto text-muted-foreground mb-4" />
+                <h3 className="text-lg font-semibold mb-1">No organisations match your filters</h3>
+                <p className="text-sm text-muted-foreground mb-5">Adjust your search or clear the filters to view the full directory.</p>
+                <Button variant="outline" onClick={() => { setSearchTerm(''); setTypeFilter('all'); setFocusFilter('all'); }}>
+                  Clear filters
                 </Button>
               </CardContent>
             </Card>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {approvedActors.map((actor) => (
-                <Card key={actor.id} className="hover:shadow-lg transition-shadow duration-300">
-                  <CardHeader className="pb-4">
-                    <div className="flex items-start space-x-4">
-                      <Avatar className="h-12 w-12">
-                        <AvatarImage src={actor.logo_url || undefined} />
-                        <AvatarFallback>
-                          <Building2 className="h-6 w-6" />
+            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
+              {visible.map((actor) => {
+                const theme = themeFor(actor.organization_name || actor.id);
+                return (
+                <Card
+                  key={actor.id}
+                  className={`group relative overflow-hidden border-border transition-all duration-300 hover:-translate-y-1 hover:shadow-xl ${theme.ring} hover:ring-2`}
+                >
+                  <span className={`absolute inset-x-0 top-0 h-1.5 bg-gradient-to-r ${theme.bar}`} />
+                  <span className={`pointer-events-none absolute inset-0 bg-gradient-to-b ${theme.tint} to-transparent opacity-60`} />
+                  <CardContent className="relative p-5 pt-6">
+                    <div className="flex items-start gap-4">
+                      <Avatar className="h-14 w-14 rounded-xl ring-2 ring-white shadow-md">
+                        <AvatarImage src={actor.logo_url || undefined} alt={`${actor.organization_name} logo`} className="object-cover" />
+                        <AvatarFallback className={`rounded-xl ${theme.avatar} text-sm font-bold`}>
+                          {initials(actor.organization_name)}
                         </AvatarFallback>
                       </Avatar>
-                      <div className="flex-1 min-w-0">
-                        <CardTitle className="text-lg leading-6 truncate" title={actor.organization_name}>
+                      <div className="min-w-0 flex-1">
+                        <h3 className="font-semibold leading-snug line-clamp-2" title={actor.organization_name}>
                           {actor.organization_name}
-                        </CardTitle>
-                        <div className="flex flex-wrap gap-2 mt-2">
-                          <Badge className="bg-green-100 text-green-800">
-                            <CheckCircle className="h-3 w-3 mr-1" />Approved
+                        </h3>
+                        <div className="flex flex-wrap items-center gap-1.5 mt-2">
+                          <Badge className="text-[10px] uppercase tracking-wide bg-emerald-600 hover:bg-emerald-600 text-white gap-1 border-0">
+                            <CheckCircle2 className="h-3 w-3" /> Verified
                           </Badge>
-                          <Badge variant="outline" className="text-xs">
+                          <Badge
+                            variant="outline"
+                            className={`text-[10px] uppercase tracking-wide ${
+                              actor.actor_type === 'state_actor'
+                                ? 'border-blue-300 bg-blue-50 text-blue-700'
+                                : 'border-amber-300 bg-amber-50 text-amber-700'
+                            }`}
+                          >
                             {actor.actor_type === 'state_actor' ? 'State Actor' : 'Non-State Actor'}
                           </Badge>
                         </div>
                       </div>
                     </div>
-                  </CardHeader>
-                  <CardContent className="pt-0">
-                    <CardDescription className="text-sm mb-4 line-clamp-3">
-                      {actor.description}
-                    </CardDescription>
-                    
-                    <div className="space-y-2">
-                      {actor.lga_operations.length > 0 && (
+
+                    {actor.description && (
+                      <p className="text-sm text-muted-foreground leading-relaxed mt-4 line-clamp-3">
+                        {actor.description}
+                      </p>
+                    )}
+
+                    <div className="mt-4 space-y-1.5 text-xs text-muted-foreground">
+                      {actor.lga_operations?.length > 0 && (
                         <div className="flex items-start gap-2">
-                          <MapPin className="h-4 w-4 text-muted-foreground mt-0.5 flex-shrink-0" />
-                          <span className="text-sm text-muted-foreground">
-                            {actor.lga_operations.slice(0, 2).join(', ')}
-                            {actor.lga_operations.length > 2 && ` +${actor.lga_operations.length - 2} more`}
+                          <MapPin className="h-3.5 w-3.5 mt-0.5 shrink-0" />
+                          <span className="truncate">
+                            {actor.lga_operations.slice(0, 3).join(', ')}
+                            {actor.lga_operations.length > 3 && ` +${actor.lga_operations.length - 3}`}
                           </span>
                         </div>
                       )}
-                      
-                      {actor.website_url && (
+                      {actor.year_established && (
                         <div className="flex items-center gap-2">
-                          <Globe className="h-4 w-4 text-muted-foreground" />
-                          <a 
-                            href={actor.website_url} 
-                            target="_blank" 
-                            rel="noopener noreferrer"
-                            className="text-sm text-primary hover:underline truncate"
-                          >
-                            Visit Website
-                          </a>
-                        </div>
-                      )}
-
-                      {actor.focus_areas.length > 0 && (
-                        <div className="flex flex-wrap gap-1 mt-3">
-                          {actor.focus_areas.slice(0, 3).map((area, index) => (
-                            <Badge key={index} variant="secondary" className="text-xs">
-                              {area}
-                            </Badge>
-                          ))}
-                          {actor.focus_areas.length > 3 && (
-                            <Badge variant="secondary" className="text-xs">
-                              +{actor.focus_areas.length - 3}
-                            </Badge>
-                          )}
+                          <Calendar className="h-3.5 w-3.5 shrink-0" /> Established {actor.year_established}
                         </div>
                       )}
                     </div>
 
-                    <div className="flex items-center justify-between mt-4 pt-4 border-t">
-                      <span className="text-xs text-muted-foreground">
-                        {actor.year_established && `Est. ${actor.year_established}`}
-                      </span>
-                      <Button variant="ghost" size="sm" className="text-primary hover:text-primary/80">
-                        <Users className="h-4 w-4 mr-1" />
-                        View Details
-                      </Button>
-                    </div>
+                    {actor.focus_areas?.length > 0 && (
+                      <div className="flex flex-wrap gap-1.5 mt-4 pt-4 border-t border-border/70">
+                        {actor.focus_areas.slice(0, 3).map((area: string, i: number) => {
+                          const Icon = FOCUS_ICONS[area] || Leaf;
+                          return (
+                            <span key={i} className={`inline-flex items-center gap-1 text-[11px] rounded-full border px-2.5 py-1 ${theme.chip}`}>
+                              <Icon className="h-3 w-3" /> {area}
+                            </span>
+                          );
+                        })}
+                        {actor.focus_areas.length > 3 && (
+                          <span className={`text-[11px] rounded-full border px-2.5 py-1 ${theme.chip}`}>
+                            +{actor.focus_areas.length - 3}
+                          </span>
+                        )}
+                      </div>
+                    )}
+
+                    {actor.website_url && (
+                      <a
+                        href={actor.website_url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className={`inline-flex items-center gap-1.5 text-xs font-semibold ${theme.link} hover:underline mt-4`}
+                      >
+                        <Globe className="h-3.5 w-3.5" /> Visit website
+                        <ArrowRight className="h-3 w-3 transition-transform group-hover:translate-x-0.5" />
+                      </a>
+                    )}
                   </CardContent>
                 </Card>
-              ))}
+                );
+              })}
+
             </div>
           )}
-        </section>
 
-        {/* Contact Section */}
-        <section className="mb-16">
-          <h2 className="text-3xl font-bold text-center mb-8">Need assistance?</h2>
-          <div className="grid md:grid-cols-3 gap-6 max-w-4xl mx-auto">
-            <Card className="text-center">
-              <CardHeader>
-                <Mail className="h-8 w-8 mx-auto text-primary mb-2" />
-                <CardTitle className="text-lg">Technical Support</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-sm text-primary">admin@environment.kn.gov.ng</p>
-              </CardContent>
-            </Card>
+          {!loading && pageCount > 1 && (
+            <div className="flex items-center justify-center gap-2 mt-10">
+              <Button variant="outline" size="sm" disabled={page === 1} onClick={() => setPage((p) => p - 1)}>
+                Previous
+              </Button>
+              <span className="text-sm text-muted-foreground tabular-nums px-3">
+                {page} / {pageCount}
+              </span>
+              <Button variant="outline" size="sm" disabled={page === pageCount} onClick={() => setPage((p) => p + 1)}>
+                Next
+              </Button>
+            </div>
+          )}
+        </div>
+      </section>
 
-            <Card className="text-center">
-              <CardHeader>
-                <Building2 className="h-8 w-8 mx-auto text-primary mb-2" />
-                <CardTitle className="text-lg">Policy Enquiries</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-sm text-primary">climatechange@environment.kn.gov.ng</p>
-              </CardContent>
-            </Card>
-
-            <Card className="text-center">
-              <CardHeader>
-                <Phone className="h-8 w-8 mx-auto text-primary mb-2" />
-                <CardTitle className="text-lg">Phone Support</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-sm text-primary">+234 803 071 9901</p>
-                <p className="text-xs text-muted-foreground">(Mon–Fri, 9 am–4 pm)</p>
-              </CardContent>
-            </Card>
+      {/* Why register */}
+      <section className="py-14 md:py-20 bg-muted/40 border-y border-border">
+        <div className="container-custom">
+          <div className="text-[11px] uppercase tracking-[0.22em] text-muted-foreground mb-2">
+            Section 02 — Benefits
           </div>
-        </section>
-      </div>
-      
+          <h2 className="text-2xl md:text-3xl font-semibold tracking-tight mb-10">Why join the registry</h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+            {[
+              { icon: Shield, title: 'Visibility & credibility', text: 'Appear in the official, publicly accessible state directory.' },
+              { icon: Handshake, title: 'Collaboration', text: 'Find partners for projects, grants and joint research.' },
+              { icon: Users, title: 'Policy influence', text: 'Receive invitations to consultations and technical working groups.' },
+              { icon: BarChart3, title: 'Data insights', text: 'Access aggregated climate-action metrics for Kano State.' },
+            ].map((b) => (
+              <Card key={b.title} className="border-border bg-card">
+                <CardContent className="p-6">
+                  <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center mb-4">
+                    <b.icon className="h-5 w-5 text-primary" />
+                  </div>
+                  <h3 className="font-semibold mb-1.5">{b.title}</h3>
+                  <p className="text-sm text-muted-foreground leading-relaxed">{b.text}</p>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Process */}
+      <section className="py-14 md:py-20">
+        <div className="container-custom">
+          <div className="text-[11px] uppercase tracking-[0.22em] text-muted-foreground mb-2">
+            Section 03 — Accreditation Process
+          </div>
+          <h2 className="text-2xl md:text-3xl font-semibold tracking-tight mb-10">Three steps to listing</h2>
+          <div className="grid md:grid-cols-3 gap-5">
+            {[
+              ['01', 'Submit the form', 'Provide organisation details, verifiable contacts and focus areas.'],
+              ['02', 'Ministry verification', 'Our accreditation team reviews submissions within five working days.'],
+              ['03', 'Approval & listing', 'Approved actors are published publicly; others receive written feedback.'],
+            ].map(([n, t, d]) => (
+              <Card key={n} className="border-border">
+                <CardContent className="p-6">
+                  <div className="text-3xl font-semibold text-primary/25 tabular-nums">{n}</div>
+                  <h3 className="font-semibold mt-2 mb-1.5">{t}</h3>
+                  <p className="text-sm text-muted-foreground leading-relaxed">{d}</p>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+          <div className="mt-8 rounded-lg border border-border bg-muted/40 p-5 text-sm text-muted-foreground">
+            <strong className="text-foreground">Minimum criteria:</strong> operate (or plan to operate) within Kano State, hold a verifiable contact, and work in at least one climate- or environment-related area.
+          </div>
+        </div>
+      </section>
+
+      {/* Support */}
+      <section className="pb-16 md:pb-24">
+        <div className="container-custom">
+          <div className="grid md:grid-cols-3 gap-5">
+            {[
+              { icon: Mail, label: 'Technical support', value: 'admin@environment.kn.gov.ng' },
+              { icon: Building2, label: 'Policy enquiries', value: 'climatechange@environment.kn.gov.ng' },
+              { icon: Phone, label: 'Telephone (Mon–Fri, 9am–4pm)', value: '+234 803 071 9901' },
+            ].map((c) => (
+              <Card key={c.label} className="border-border">
+                <CardContent className="p-5 flex items-start gap-3">
+                  <div className="h-9 w-9 rounded-md bg-primary/10 flex items-center justify-center shrink-0">
+                    <c.icon className="h-4 w-4 text-primary" />
+                  </div>
+                  <div className="min-w-0">
+                    <div className="text-[11px] uppercase tracking-[0.16em] text-muted-foreground">{c.label}</div>
+                    <div className="text-sm font-medium break-all mt-0.5">{c.value}</div>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </div>
+      </section>
+
       <Footer />
     </div>
   );

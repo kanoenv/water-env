@@ -10,6 +10,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import AdminLayout from '@/components/admin/AdminLayout';
+import AdminPageHeader from '@/components/admin/AdminPageHeader';
 import { BarChart, Upload, Settings, Plus, Gauge, AlertTriangle, CheckCircle, Save, Loader2, Trash2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
@@ -246,13 +247,12 @@ const AirQuality = () => {
 
   return (
     <AdminLayout>
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold flex items-center gap-2">
-          <BarChart size={28} />
-          Air Quality Management
-        </h1>
-        
-        <div className="space-x-2">
+      <div className="mb-6">
+        <AdminPageHeader
+          title="Air Quality Management"
+          description="Monitor sensor stations and publish live air-quality readings for Kano State."
+          breadcrumb={[{ label: 'Admin', to: '/admin/dashboard' }, { label: 'Air Quality' }]}
+          actions={<>
           <Button variant="outline" className="flex items-center gap-2">
             <Upload size={16} />
             Import Data
@@ -264,7 +264,8 @@ const AirQuality = () => {
             <Plus size={16} />
             Add Station
           </Button>
-        </div>
+          </>}
+        />
       </div>
       
       <Tabs defaultValue="stations">

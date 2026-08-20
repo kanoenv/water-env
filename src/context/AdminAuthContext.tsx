@@ -93,8 +93,9 @@ export const AdminAuthProvider = ({ children }: { children: React.ReactNode }) =
         throw new Error('This account does not have admin access.');
       }
 
-      toast({ title: 'Login Successful', description: 'Welcome back to the database admin portal' });
-      navigate('/admin/database');
+      toast({ title: 'Login Successful', description: 'Welcome back to the admin console' });
+      navigate('/admin/dashboard');
+
     } catch (err) {
       toast({
         title: 'Login Failed',
@@ -114,7 +115,7 @@ export const AdminAuthProvider = ({ children }: { children: React.ReactNode }) =
         email,
         password,
         options: {
-          emailRedirectTo: `${window.location.origin}/admin-login`,
+          emailRedirectTo: `https://environment.kn.gov.ng/admin-login`,
           data: { full_name: fullName },
         },
       });

@@ -91,6 +91,359 @@ export type Database = {
           },
         ]
       }
+      borehole_applicants: {
+        Row: {
+          created_at: string
+          email: string | null
+          full_name: string
+          id: string
+          phone: string | null
+          role: string | null
+          source_user_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          email?: string | null
+          full_name: string
+          id?: string
+          phone?: string | null
+          role?: string | null
+          source_user_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          email?: string | null
+          full_name?: string
+          id?: string
+          phone?: string | null
+          role?: string | null
+          source_user_id?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      borehole_applications: {
+        Row: {
+          admin_remark: string | null
+          beneficiaries_range: string
+          community_leader: string | null
+          community_name: string
+          created_at: string
+          declaration: boolean
+          full_name: string
+          id: string
+          lga: string
+          location_photo: string | null
+          phone_number: string
+          source_user_id: string | null
+          status: string
+          tracking_number: string
+          updated_at: string
+          ward: string
+          working_borehole: boolean
+        }
+        Insert: {
+          admin_remark?: string | null
+          beneficiaries_range: string
+          community_leader?: string | null
+          community_name: string
+          created_at?: string
+          declaration?: boolean
+          full_name: string
+          id?: string
+          lga: string
+          location_photo?: string | null
+          phone_number: string
+          source_user_id?: string | null
+          status?: string
+          tracking_number: string
+          updated_at?: string
+          ward: string
+          working_borehole?: boolean
+        }
+        Update: {
+          admin_remark?: string | null
+          beneficiaries_range?: string
+          community_leader?: string | null
+          community_name?: string
+          created_at?: string
+          declaration?: boolean
+          full_name?: string
+          id?: string
+          lga?: string
+          location_photo?: string | null
+          phone_number?: string
+          source_user_id?: string | null
+          status?: string
+          tracking_number?: string
+          updated_at?: string
+          ward?: string
+          working_borehole?: boolean
+        }
+        Relationships: []
+      }
+      borehole_audit_logs: {
+        Row: {
+          action: string
+          application_id: string | null
+          created_at: string
+          details: string | null
+          id: string
+          source_admin_id: string | null
+        }
+        Insert: {
+          action: string
+          application_id?: string | null
+          created_at?: string
+          details?: string | null
+          id?: string
+          source_admin_id?: string | null
+        }
+        Update: {
+          action?: string
+          application_id?: string | null
+          created_at?: string
+          details?: string | null
+          id?: string
+          source_admin_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "borehole_audit_logs_application_id_fkey"
+            columns: ["application_id"]
+            isOneToOne: false
+            referencedRelation: "borehole_applications"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      borehole_notifications: {
+        Row: {
+          created_at: string
+          id: string
+          is_read: boolean
+          message: string
+          source_user_id: string | null
+          title: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_read?: boolean
+          message: string
+          source_user_id?: string | null
+          title: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_read?: boolean
+          message?: string
+          source_user_id?: string | null
+          title?: string
+        }
+        Relationships: []
+      }
+      climate_actors: {
+        Row: {
+          actor_type: string
+          approved_at: string | null
+          approved_by: string | null
+          contact_email: string
+          contact_name: string
+          contact_phone: string | null
+          created_at: string
+          description: string | null
+          focus_areas: string[]
+          id: string
+          lga_operations: string[]
+          logo_url: string | null
+          organization_name: string
+          password_hash: string | null
+          rejection_reason: string | null
+          status: string
+          updated_at: string
+          website_url: string | null
+          year_established: number | null
+        }
+        Insert: {
+          actor_type: string
+          approved_at?: string | null
+          approved_by?: string | null
+          contact_email: string
+          contact_name: string
+          contact_phone?: string | null
+          created_at?: string
+          description?: string | null
+          focus_areas?: string[]
+          id?: string
+          lga_operations?: string[]
+          logo_url?: string | null
+          organization_name: string
+          password_hash?: string | null
+          rejection_reason?: string | null
+          status?: string
+          updated_at?: string
+          website_url?: string | null
+          year_established?: number | null
+        }
+        Update: {
+          actor_type?: string
+          approved_at?: string | null
+          approved_by?: string | null
+          contact_email?: string
+          contact_name?: string
+          contact_phone?: string | null
+          created_at?: string
+          description?: string | null
+          focus_areas?: string[]
+          id?: string
+          lga_operations?: string[]
+          logo_url?: string | null
+          organization_name?: string
+          password_hash?: string | null
+          rejection_reason?: string | null
+          status?: string
+          updated_at?: string
+          website_url?: string | null
+          year_established?: number | null
+        }
+        Relationships: []
+      }
+      contact_messages: {
+        Row: {
+          admin_notes: string | null
+          created_at: string
+          email: string
+          handled_at: string | null
+          handled_by: string | null
+          id: string
+          message: string
+          name: string
+          phone: string | null
+          status: string
+          subject: string
+          updated_at: string
+        }
+        Insert: {
+          admin_notes?: string | null
+          created_at?: string
+          email: string
+          handled_at?: string | null
+          handled_by?: string | null
+          id?: string
+          message: string
+          name: string
+          phone?: string | null
+          status?: string
+          subject: string
+          updated_at?: string
+        }
+        Update: {
+          admin_notes?: string | null
+          created_at?: string
+          email?: string
+          handled_at?: string | null
+          handled_by?: string | null
+          id?: string
+          message?: string
+          name?: string
+          phone?: string | null
+          status?: string
+          subject?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      email_send_log: {
+        Row: {
+          created_at: string
+          error_message: string | null
+          id: string
+          message_id: string | null
+          metadata: Json | null
+          recipient_email: string
+          status: string
+          template_name: string
+        }
+        Insert: {
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          message_id?: string | null
+          metadata?: Json | null
+          recipient_email: string
+          status: string
+          template_name: string
+        }
+        Update: {
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          message_id?: string | null
+          metadata?: Json | null
+          recipient_email?: string
+          status?: string
+          template_name?: string
+        }
+        Relationships: []
+      }
+      email_send_state: {
+        Row: {
+          auth_email_ttl_minutes: number
+          batch_size: number
+          id: number
+          retry_after_until: string | null
+          send_delay_ms: number
+          transactional_email_ttl_minutes: number
+          updated_at: string
+        }
+        Insert: {
+          auth_email_ttl_minutes?: number
+          batch_size?: number
+          id?: number
+          retry_after_until?: string | null
+          send_delay_ms?: number
+          transactional_email_ttl_minutes?: number
+          updated_at?: string
+        }
+        Update: {
+          auth_email_ttl_minutes?: number
+          batch_size?: number
+          id?: number
+          retry_after_until?: string | null
+          send_delay_ms?: number
+          transactional_email_ttl_minutes?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      email_unsubscribe_tokens: {
+        Row: {
+          created_at: string
+          email: string
+          id: string
+          token: string
+          used_at: string | null
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          id?: string
+          token: string
+          used_at?: string | null
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          id?: string
+          token?: string
+          used_at?: string | null
+        }
+        Relationships: []
+      }
       organizations: {
         Row: {
           address: string | null
@@ -129,6 +482,53 @@ export type Database = {
           registration_number?: string | null
         }
         Relationships: []
+      }
+      planters: {
+        Row: {
+          active: boolean
+          application_id: string
+          assigned_district: string | null
+          assigned_site: string | null
+          created_at: string
+          full_name: string
+          id: string
+          phone: string
+          pin_hash: string
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          application_id: string
+          assigned_district?: string | null
+          assigned_site?: string | null
+          created_at?: string
+          full_name: string
+          id?: string
+          phone: string
+          pin_hash: string
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          application_id?: string
+          assigned_district?: string | null
+          assigned_site?: string | null
+          created_at?: string
+          full_name?: string
+          id?: string
+          phone?: string
+          pin_hash?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "planters_application_id_fkey"
+            columns: ["application_id"]
+            isOneToOne: false
+            referencedRelation: "tree_campaign_applications"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       planting_reports: {
         Row: {
@@ -213,6 +613,57 @@ export type Database = {
         }
         Relationships: []
       }
+      reports: {
+        Row: {
+          created_at: string
+          description: string
+          id: string
+          location: string
+          photos: string[]
+          reporter_email: string | null
+          reporter_name: string | null
+          reporter_phone: string | null
+          resolution_notes: string | null
+          resolved_at: string | null
+          resolved_by: string | null
+          status: string
+          type: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description: string
+          id?: string
+          location: string
+          photos?: string[]
+          reporter_email?: string | null
+          reporter_name?: string | null
+          reporter_phone?: string | null
+          resolution_notes?: string | null
+          resolved_at?: string | null
+          resolved_by?: string | null
+          status?: string
+          type: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string
+          id?: string
+          location?: string
+          photos?: string[]
+          reporter_email?: string | null
+          reporter_name?: string | null
+          reporter_phone?: string | null
+          resolution_notes?: string | null
+          resolved_at?: string | null
+          resolved_by?: string | null
+          status?: string
+          type?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       seed_assignments: {
         Row: {
           application_id: string | null
@@ -263,6 +714,30 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      suppressed_emails: {
+        Row: {
+          created_at: string
+          email: string
+          id: string
+          metadata: Json | null
+          reason: string
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          id?: string
+          metadata?: Json | null
+          reason: string
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          id?: string
+          metadata?: Json | null
+          reason?: string
+        }
+        Relationships: []
       }
       tree_campaign_applications: {
         Row: {
@@ -368,6 +843,7 @@ export type Database = {
           application_id: string
           created_at: string
           distribution_id: string | null
+          district: string | null
           id: string
           latitude: number | null
           location_name: string | null
@@ -375,6 +851,7 @@ export type Database = {
           longitude: number | null
           notes: string | null
           photo_url: string | null
+          planter_id: string | null
           planting_date: string
           species: string | null
           survival_rate: number | null
@@ -385,6 +862,7 @@ export type Database = {
           application_id: string
           created_at?: string
           distribution_id?: string | null
+          district?: string | null
           id?: string
           latitude?: number | null
           location_name?: string | null
@@ -392,6 +870,7 @@ export type Database = {
           longitude?: number | null
           notes?: string | null
           photo_url?: string | null
+          planter_id?: string | null
           planting_date?: string
           species?: string | null
           survival_rate?: number | null
@@ -402,6 +881,7 @@ export type Database = {
           application_id?: string
           created_at?: string
           distribution_id?: string | null
+          district?: string | null
           id?: string
           latitude?: number | null
           location_name?: string | null
@@ -409,6 +889,7 @@ export type Database = {
           longitude?: number | null
           notes?: string | null
           photo_url?: string | null
+          planter_id?: string | null
           planting_date?: string
           species?: string | null
           survival_rate?: number | null
@@ -428,6 +909,13 @@ export type Database = {
             columns: ["distribution_id"]
             isOneToOne: false
             referencedRelation: "tree_seed_distributions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tree_planting_logs_planter_id_fkey"
+            columns: ["planter_id"]
+            isOneToOne: false
+            referencedRelation: "planters"
             referencedColumns: ["id"]
           },
         ]
@@ -505,6 +993,62 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      delete_email: {
+        Args: { message_id: number; queue_name: string }
+        Returns: boolean
+      }
+      email_queue_dispatch: { Args: never; Returns: undefined }
+      enqueue_email: {
+        Args: { payload: Json; queue_name: string }
+        Returns: number
+      }
+      get_tree_campaign_directory:
+        | {
+            Args: {
+              _limit?: number
+              _offset?: number
+              _search?: string
+              _status?: string
+            }
+            Returns: {
+              address: string
+              organization_name: string
+              organization_type: string
+              status: string
+            }[]
+          }
+        | {
+            Args: {
+              _limit?: number
+              _location?: string
+              _offset?: number
+              _search?: string
+              _status?: string
+              _type?: string
+            }
+            Returns: {
+              address: string
+              organization_name: string
+              organization_type: string
+              status: string
+            }[]
+          }
+      get_tree_campaign_directory_count:
+        | { Args: { _search?: string; _status?: string }; Returns: number }
+        | {
+            Args: {
+              _location?: string
+              _search?: string
+              _status?: string
+              _type?: string
+            }
+            Returns: number
+          }
+      get_tree_campaign_directory_facets: {
+        Args: { _status?: string }
+        Returns: Json
+      }
+      get_tree_campaign_public_stats: { Args: never; Returns: Json }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -512,9 +1056,29 @@ export type Database = {
         }
         Returns: boolean
       }
+      is_10m_application: { Args: { _app_id: string }; Returns: boolean }
+      is_org_for_application: { Args: { _app_id: string }; Returns: boolean }
+      is_tree_admin: { Args: { _user_id: string }; Returns: boolean }
+      move_to_dlq: {
+        Args: {
+          dlq_name: string
+          message_id: number
+          payload: Json
+          source_queue: string
+        }
+        Returns: number
+      }
+      read_email_batch: {
+        Args: { batch_size: number; queue_name: string; vt: number }
+        Returns: {
+          message: Json
+          msg_id: number
+          read_ct: number
+        }[]
+      }
     }
     Enums: {
-      app_role: "admin" | "user"
+      app_role: "admin" | "user" | "org" | "tree_admin"
       applicant_type: "individual" | "organization"
       application_status: "pending" | "approved" | "rejected"
       report_status: "planted" | "growing" | "mature" | "failed"
@@ -653,7 +1217,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      app_role: ["admin", "user"],
+      app_role: ["admin", "user", "org", "tree_admin"],
       applicant_type: ["individual", "organization"],
       application_status: ["pending", "approved", "rejected"],
       report_status: ["planted", "growing", "mature", "failed"],

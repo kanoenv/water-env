@@ -32,6 +32,7 @@ import ReportIssue from "./pages/ReportIssue";
 import AdminLogin from "./pages/AdminLogin";
 import BannerManagement from "./pages/admin/BannerManagement";
 import Reports from "./pages/admin/Reports";
+import Messages from "./pages/admin/Messages";
 import ContentManagement from "./pages/admin/ContentManagement";
 import AdminAirQuality from "./pages/admin/AirQuality";
 import Recruitment from "./pages/admin/Recruitment";
@@ -76,6 +77,29 @@ import AdminSetup from "./pages/AdminSetup";
 import ForestGuardApplications from "./pages/admin/ForestGuardApplications";
 import TreePlantingTracker from "./pages/admin/TreePlantingTracker";
 import DatabaseAdmin from "./pages/admin/DatabaseAdmin";
+import Dashboard from "./pages/admin/Dashboard";
+import BoreholeApplications from "./pages/admin/BoreholeApplications";
+import TreeAdminLogin from "./pages/tree-admin/TreeAdminLogin";
+import TreeAdminDashboard from "./pages/tree-admin/TreeAdminDashboard";
+import OrgLogin from "./pages/org/OrgLogin";
+import OrgSetup from "./pages/org/OrgSetup";
+import OrgDashboard from "./pages/org/OrgDashboard";
+import OrgPlanters from "./pages/org/OrgPlanters";
+import OrgPlantings from "./pages/org/OrgPlantings";
+import OrgPlant from "./pages/org/OrgPlant";
+import PlanterLogin from "./pages/planter/PlanterLogin";
+import PlanterLog from "./pages/planter/PlanterLog";
+import PlanterHistory from "./pages/planter/PlanterHistory";
+import Unsubscribe from "./pages/Unsubscribe";
+import PillarWaterSupply from "./pages/pillars/WaterSupplySanitation";
+import PillarIWR from "./pages/pillars/IntegratedWaterResources";
+import PillarPolicy from "./pages/pillars/PolicyGovernance";
+import PillarClimate from "./pages/pillars/ClimateAction";
+import PillarPollution from "./pages/pillars/PollutionControl";
+import PillarWaste from "./pages/pillars/WasteCircular";
+import Videos from "./pages/Videos";
+
+
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -110,8 +134,9 @@ const AuthRoute = ({ children }: { children: React.ReactNode }) => {
   }
   
   if (isAuthenticated) {
-    return <Navigate to="/admin/database" replace />;
+    return <Navigate to="/admin/dashboard" replace />;
   }
+
   
   return <>{children}</>;
 };
@@ -126,6 +151,14 @@ const AppRoutes = () => {
         <Route path="/about" element={<About />} />
         <Route path="/programs" element={<Programs />} />
         <Route path="/agencies" element={<Agencies />} />
+
+        {/* Strategic Pillars */}
+        <Route path="/pillars/water-supply-sanitation" element={<PillarWaterSupply />} />
+        <Route path="/pillars/integrated-water-resources" element={<PillarIWR />} />
+        <Route path="/pillars/policy-governance" element={<PillarPolicy />} />
+        <Route path="/pillars/climate-action" element={<PillarClimate />} />
+        <Route path="/pillars/pollution-control" element={<PillarPollution />} />
+        <Route path="/pillars/waste-circular-economy" element={<PillarWaste />} />
         
         {/* Programs Routes */}
         <Route path="/programs/remasab" element={<ProgramREMASAB />} />
@@ -192,6 +225,8 @@ const AppRoutes = () => {
         <Route path="/news" element={<News />} />
         <Route path="/news/press-releases" element={<PressReleases />} />
         <Route path="/news/events" element={<Events />} />
+        <Route path="/videos" element={<Videos />} />
+        <Route path="/documentary" element={<Navigate to="/videos" replace />} />
         
         {/* Resources Routes */}
         <Route path="/resources/laws" element={<Laws />} />
@@ -208,14 +243,20 @@ const AppRoutes = () => {
         <Route path="/admin-setup" element={<AdminSetup />} />
         <Route path="/admin/database" element={<ProtectedRoute><DatabaseAdmin /></ProtectedRoute>} />
         <Route path="/admin-login" element={<AuthRoute><AdminLogin /></AuthRoute>} />
+
+        {/* 10 Million Trees campaign officer console */}
+        <Route path="/tree-admin-login" element={<TreeAdminLogin />} />
+        <Route path="/tree-admin" element={<TreeAdminDashboard />} />
         
         {/* Admin Routes */}
-        <Route path="/admin" element={<Navigate to="/admin/database" replace />} />
-        <Route path="/admin/dashboard" element={<Navigate to="/admin/database" replace />} />
+        <Route path="/admin" element={<Navigate to="/admin/dashboard" replace />} />
+        <Route path="/admin/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+
         <Route path="/admin/banners" element={<ProtectedRoute><BannerManagement /></ProtectedRoute>} />
         <Route path="/admin/programs" element={<ProtectedRoute><ProgramManagement /></ProtectedRoute>} />
         <Route path="/admin/careers" element={<ProtectedRoute><CareerManagement /></ProtectedRoute>} />
         <Route path="/admin/reports" element={<ProtectedRoute><Reports /></ProtectedRoute>} />
+        <Route path="/admin/messages" element={<ProtectedRoute><Messages /></ProtectedRoute>} />
         <Route path="/admin/content" element={<ProtectedRoute><ContentManagement /></ProtectedRoute>} />
         <Route path="/admin/air-quality" element={<ProtectedRoute><AdminAirQuality /></ProtectedRoute>} />
         <Route path="/admin/recruitment" element={<ProtectedRoute><Recruitment /></ProtectedRoute>} />
@@ -225,7 +266,24 @@ const AppRoutes = () => {
         <Route path="/admin/users" element={<ProtectedRoute><AdminManagement /></ProtectedRoute>} />
         <Route path="/admin/pdfs" element={<ProtectedRoute><PdfManagementPage /></ProtectedRoute>} />
         <Route path="/admin/climate-actors" element={<ProtectedRoute><ClimateActorManagement /></ProtectedRoute>} />
-        
+        <Route path="/admin/borehole-applications" element={<ProtectedRoute><BoreholeApplications /></ProtectedRoute>} />
+
+        {/* Organization Portal */}
+        <Route path="/org" element={<Navigate to="/org/dashboard" replace />} />
+        <Route path="/org/login" element={<OrgLogin />} />
+        <Route path="/org/setup" element={<OrgSetup />} />
+        <Route path="/org/dashboard" element={<OrgDashboard />} />
+        <Route path="/org/planters" element={<OrgPlanters />} />
+        <Route path="/org/plantings" element={<OrgPlantings />} />
+        <Route path="/org/plant" element={<OrgPlant />} />
+
+        {/* Planter Mobile */}
+        <Route path="/planter" element={<PlanterLogin />} />
+        <Route path="/planter/log" element={<PlanterLog />} />
+        <Route path="/planter/history" element={<PlanterHistory />} />
+        <Route path="/unsubscribe" element={<Unsubscribe />} />
+
+
         {/* Catch-all Route */}
         <Route path="*" element={<CatchAllRoute />} />
       </Routes>

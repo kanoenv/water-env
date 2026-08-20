@@ -64,6 +64,15 @@
     --sidebar-accent-foreground: 210 40% 98%;
     --sidebar-border: 215 28% 17%;
     --sidebar-ring: 220 91% 56%;
+
+    /* Footer / dark branded section tokens — matched to ministry header palette */
+    --footer-background: 122 39% 34%;
+    --footer-foreground: 0 0% 100%;
+    --footer-muted: 0 0% 100% / 0.75;
+    --footer-accent: 45 100% 51%;
+    --footer-border: 0 0% 100% / 0.18;
+    --footer-card: 0 0% 0% / 0.18;
+    --footer-card-foreground: 0 0% 100%;
   }
 
   .dark {

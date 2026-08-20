@@ -40,12 +40,21 @@ const Navbar = () => {
         <div className="flex justify-between items-center py-3">
           {/* Logo Section */}
           <div className="flex items-center">
-            <Link to="/" className="flex items-center group">
+            <Link to="/" className="flex items-center gap-3 group">
               <img 
-                src="/lovable-uploads/4f962187-9c7c-4f29-9af7-0d2d3413167d.png" 
+                src="/kano-ministry-seal.png" 
                 alt="Kano State Ministry of Water Resources, Environment and Climate Change Logo" 
-                className="ministry-logo"
+                className="h-14 md:h-16 w-14 md:w-16 object-cover bg-white rounded-full"
               />
+              <div className="hidden sm:flex flex-col leading-tight">
+                <span className="text-sm md:text-xl font-black uppercase tracking-[0.15em] text-[#FFD700] drop-shadow-md">Kano State</span>
+                <span className="text-sm md:text-base font-extrabold max-w-[240px] md:max-w-none text-white">
+                  Ministry of Water Resources,
+                </span>
+                <span className="text-xs md:text-sm font-extrabold opacity-95 text-white">
+                  Environment and Climate Change
+                </span>
+              </div>
             </Link>
           </div>
 

@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { TreePine, CheckCircle, Award, Sprout, ArrowRight, Calendar } from 'lucide-react';
-import heroSeedlings from '@/assets/hero/ministry-seedling-beds.jpg.asset.json';
+const heroSeedlings = { url: '/hero/ministry-seedling-beds.jpg' };
 
 const FiveMillionTrees = () => (
   <div className="min-h-screen bg-white">

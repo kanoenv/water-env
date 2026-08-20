@@ -2,13 +2,13 @@ import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { ArrowRight, ChevronRight, Award, Target, Globe, TreePine, Sprout, Users } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import heroNursery from '@/assets/hero/ministry-nursery-rows.jpg.asset.json';
-import heroFieldVisit from '@/assets/hero/ministry-field-visit.jpg.asset.json';
-import heroCommissioner from '@/assets/hero/ministry-commissioner-planting.jpg.asset.json';
-import heroSeedlings from '@/assets/hero/ministry-seedling-beds.jpg.asset.json';
-import heroWaterTreatment from '@/assets/hero/hero-water-treatment.jpg.asset.json';
-import beautificationPark from '@/assets/hero/beautification-park.jpg.asset.json';
-import beautificationLights from '@/assets/hero/beautification-lights.jpg.asset.json';
+const heroNursery = { url: '/hero/ministry-nursery-rows.jpg' };
+const heroFieldVisit = { url: '/hero/ministry-field-visit.jpg' };
+const heroCommissioner = { url: '/hero/ministry-commissioner-planting.jpg' };
+const heroSeedlings = { url: '/hero/ministry-seedling-beds.jpg' };
+const heroWaterTreatment = { url: '/hero/hero-water-treatment.jpg' };
+const beautificationPark = { url: '/hero/beautification-park.jpg' };
+const beautificationLights = { url: '/hero/beautification-lights.jpg' };
 
 interface HomeBanner {
   id: string;

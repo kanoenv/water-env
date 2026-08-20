@@ -4,10 +4,11 @@ import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
 import HeroSection from '@/components/home/HeroSection';
 import QuickLinks from '@/components/home/QuickLinks';
+import KeyFigures from '@/components/home/KeyFigures';
 import MissionVision from '@/components/home/MissionVision';
 import Messages from '@/components/home/Messages';
-import FeaturedAgencies from '@/components/home/FeaturedAgencies';
-import SuccessStories from '@/components/home/SuccessStories';
+import RecentNews from '@/components/home/RecentNews';
+// SuccessStories removed
 import EventsSection from '@/components/home/EventsSection';
 import VideoSection from '@/components/home/VideoSection';
 import ReportBanner from '@/components/ui/ReportBanner';
@@ -23,11 +24,17 @@ const Index = () => {
         <div className="w-full">
           <HeroSection />
         </div>
-        
+
+        {/* Key figures strip */}
+        <div className="w-full">
+          <KeyFigures />
+        </div>
+
         {/* Quick Links - Professional spacing for larger screens */}
         <div className="w-full">
           <QuickLinks />
         </div>
+
         
         {/* Mission & Vision - Better layout for desktop */}
         <div className="w-full">
@@ -39,23 +46,16 @@ const Index = () => {
           <Messages />
         </div>
         
-        {/* Featured Agencies - Professional desktop layout */}
+        {/* Latest News - replaces Our Impact / Recent Programs */}
         <div className="w-full">
-          <FeaturedAgencies />
+          <RecentNews />
         </div>
-        
-        
-        
+
         {/* Video Section - Optimized for all screens */}
         <div className="w-full">
           <VideoSection />
         </div>
-        
-        {/* Success Stories - Professional layout */}
-        <div className="w-full">
-          <SuccessStories />
-        </div>
-        
+
         {/* Events Section - Enhanced for desktop */}
         <div className="w-full">
           <EventsSection />

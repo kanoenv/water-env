@@ -10,6 +10,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { Textarea } from '@/components/ui/textarea';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import AdminLayout from '@/components/admin/AdminLayout';
+import AdminPageHeader from '@/components/admin/AdminPageHeader';
 import { FileText, Search, Filter, Eye, CheckCircle, Loader2, RefreshCw, Clock, AlertTriangle, User, MapPin, Calendar, MessageSquare } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -40,6 +41,8 @@ const Reports = () => {
   const [reports, setReports] = useState<Report[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [selectedReport, setSelectedReport] = useState<Report | null>(null);
+  const [photoUrls, setPhotoUrls] = useState<string[]>([]);
+
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [resolutionNotes, setResolutionNotes] = useState('');
   const [isUpdating, setIsUpdating] = useState(false);
@@ -79,6 +82,27 @@ const Reports = () => {
       fetchReports();
     }
   }, [isAuthenticated, fetchReports]);
+
+  // Load signed URLs for the selected report's photos
+  useEffect(() => {
+    const load = async () => {
+      const paths = (selectedReport as any)?.photos || [];
+      if (!selectedReport || !paths.length) {
+        setPhotoUrls([]);
+        return;
+      }
+      const urls: string[] = [];
+      for (const p of paths) {
+        if (typeof p === 'string' && p.startsWith('http')) { urls.push(p); continue; }
+        const { data } = await supabase.storage.from('report-photos').createSignedUrl(p, 3600);
+        if (data?.signedUrl) urls.push(data.signedUrl);
+      }
+      setPhotoUrls(urls);
+    };
+    load();
+  }, [selectedReport]);
+
+
   
   // Filter reports based on search query, status filter, and type filter
   const filteredReports = reports.filter(report => {
@@ -220,16 +244,11 @@ const Reports = () => {
     <AdminLayout>
       <div className="space-y-6">
         {/* Header */}
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-          <div>
-            <h1 className="text-3xl font-bold flex items-center gap-2">
-              <FileText size={28} />
-              Environmental Reports
-            </h1>
-            <p className="text-gray-600 mt-1">Manage and respond to citizen-reported environmental issues</p>
-          </div>
-          
-          <div className="flex items-center gap-2">
+        <AdminPageHeader
+          title="Environmental Reports"
+          description="Manage and respond to citizen-reported environmental issues across all 44 local government areas."
+          breadcrumb={[{ label: 'Admin', to: '/admin/dashboard' }, { label: 'Reports' }]}
+          actions={<>
             <Button 
               variant="outline" 
               className="flex items-center gap-2"
@@ -239,8 +258,9 @@ const Reports = () => {
               <RefreshCw size={16} className={isLoading ? "animate-spin" : ""} />
               Refresh
             </Button>
-          </div>
-        </div>
+          </>}
+        />
+
 
         {/* Statistics Cards */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
@@ -541,8 +561,18 @@ const Reports = () => {
                   </CardHeader>
                   <CardContent>
                     <p className="bg-gray-50 p-4 rounded-md border">{selectedReport.description}</p>
+                    {photoUrls.length > 0 && (
+                      <div className="mt-4 grid grid-cols-2 md:grid-cols-4 gap-3">
+                        {photoUrls.map((url) => (
+                          <a key={url} href={url} target="_blank" rel="noopener noreferrer">
+                            <img src={url} alt="Reported environmental issue photo" className="w-full h-28 object-cover rounded-md border hover:opacity-90" />
+                          </a>
+                        ))}
+                      </div>
+                    )}
                   </CardContent>
                 </Card>
+
 
                 {/* Timeline */}
                 <Card>

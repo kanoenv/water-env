@@ -1,12 +1,21 @@
 
 import React, { useState } from 'react';
-import { Play, Award, ChevronRight } from 'lucide-react';
+import { Play, Award, ChevronRight, Film } from 'lucide-react';
 import { AspectRatio } from '@/components/ui/aspect-ratio';
 import { Button } from '@/components/ui/button';
+import { Link } from 'react-router-dom';
+
+const VIDEOS = [
+  { id: 'AgHQKGgnjBA', title: 'Ministry Highlight — Field Short', label: 'Ministry Short' },
+  { id: '-H0ho7B2mKc', title: 'Water Resources & Climate Action Update', label: 'Ministry Feature' },
+  { id: 'p_sWLnwfyLM', title: 'Kano State Environmental Transformation', label: 'Official Documentary' },
+  { id: '0yRrhaF0TGQ', title: 'Ministry Field Update — 2026', label: 'Field Documentary' },
+];
 
 const VideoSection = () => {
+  const [activeId, setActiveId] = useState(VIDEOS[0].id);
   const [showVideo, setShowVideo] = useState(false);
-  const videoId = 'p_sWLnwfyLM';
+  const videoId = activeId;
   
   return (
     <section className="py-20 bg-gradient-to-br from-gray-900 via-gray-800 to-black text-white relative overflow-hidden">
@@ -51,14 +60,44 @@ const VideoSection = () => {
               </div>
             </div>
             
-            <Button 
-              className="bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white px-10 py-4 text-lg font-semibold rounded-2xl shadow-2xl hover:shadow-red-500/25 transition-all duration-500 transform hover:translate-y-[-2px] group"
-              onClick={() => setShowVideo(true)}
-            >
-              <Play className="mr-3 h-6 w-6 group-hover:scale-110 transition-transform duration-300" />
-              Watch Documentary
-              <ChevronRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform duration-300" />
-            </Button>
+            <div className="flex flex-wrap gap-3">
+              <Button 
+                className="bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white px-8 py-4 text-base font-semibold rounded-2xl shadow-2xl hover:shadow-red-500/25 transition-all duration-500 transform hover:translate-y-[-2px] group"
+                onClick={() => setShowVideo(true)}
+              >
+                <Play className="mr-3 h-5 w-5 group-hover:scale-110 transition-transform duration-300" />
+                Watch Documentary
+                <ChevronRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform duration-300" />
+              </Button>
+              <Button asChild variant="outline" className="border-white/40 bg-transparent text-white hover:bg-white hover:text-gray-900 px-8 py-4 text-base font-semibold rounded-2xl">
+                <Link to="/videos" className="flex items-center gap-2">
+                  <Film className="h-5 w-5" />
+                  All Videos
+                </Link>
+              </Button>
+            </div>
+
+            {/* Video switcher */}
+            <div className="grid grid-cols-2 gap-3 pt-4">
+              {VIDEOS.map((v) => (
+                <button
+                  key={v.id}
+                  onClick={() => { setActiveId(v.id); setShowVideo(false); }}
+                  className={`text-left rounded-xl overflow-hidden border transition-all ${activeId === v.id ? 'border-red-500 ring-2 ring-red-500/40' : 'border-white/15 hover:border-white/40'}`}
+                >
+                  <div className="relative aspect-video bg-gray-800">
+                    <img src={`https://i.ytimg.com/vi/${v.id}/mqdefault.jpg`} alt={v.title} className="absolute inset-0 w-full h-full object-cover" />
+                    <div className="absolute inset-0 bg-black/30 flex items-center justify-center">
+                      <Play className="h-6 w-6 text-white" />
+                    </div>
+                  </div>
+                  <div className="p-2 bg-white/5">
+                    <p className="text-xs text-red-300 font-semibold uppercase tracking-wider">{v.label}</p>
+                    <p className="text-white text-sm font-medium truncate">{v.title}</p>
+                  </div>
+                </button>
+              ))}
+            </div>
           </div>
           
           <div className="relative">
@@ -83,9 +122,9 @@ const VideoSection = () => {
                     </button>
                     
                     <div className="absolute bottom-6 left-6 right-6 text-white">
-                      <h3 className="text-2xl font-bold mb-2">Kano State Environmental Transformation</h3>
+                      <h3 className="text-2xl font-bold mb-2">{VIDEOS.find(v => v.id === videoId)?.title}</h3>
                       <div className="flex items-center text-sm">
-                        <span className="bg-white/20 backdrop-blur-sm px-3 py-1 rounded-full">Official Documentary</span>
+                        <span className="bg-white/20 backdrop-blur-sm px-3 py-1 rounded-full">{VIDEOS.find(v => v.id === videoId)?.label}</span>
                       </div>
                     </div>
                   </AspectRatio>

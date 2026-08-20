@@ -18,12 +18,17 @@ import {
   Shield,
   Bell,
   Search,
-  Database,
+  LayoutDashboard,
   ExternalLink,
+  Droplets,
+  MessageSquare,
+
+
 } from 'lucide-react';
 import { useAdminAuth } from '@/context/AdminAuthContext';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Input } from '@/components/ui/input';
+import ministrySeal from '@/assets/kano-ministry-seal.png.asset.json';
 import {
   Sidebar,
   SidebarContent,
@@ -51,25 +56,20 @@ type MenuItem = {
 };
 
 const menuItems: MenuItem[] = [
-  { path: '/admin/database', label: 'Database', icon: Database, description: 'Records & tables', category: 'main' },
+  { path: '/admin/dashboard', label: 'Dashboard', icon: LayoutDashboard, description: 'Overview & metrics', category: 'main' },
   { path: '/admin/reports', label: 'Reports', icon: FileText, description: 'Environmental reports', category: 'main' },
+  { path: '/admin/messages', label: 'Citizen Messages', icon: MessageSquare, description: 'Contact form inbox', category: 'main' },
   { path: '/admin/climate-actors', label: 'Climate Actors', icon: Building2, description: 'Organizations', category: 'main' },
   { path: '/admin/tree-campaign', label: 'Tree Campaigns', icon: TreePine, description: '5M & 10M applications', category: 'main' },
-  { path: '/admin/forest-guard-applications', label: 'Forest Guard', icon: UserCheck, description: 'Applications', category: 'main' },
+  { path: '/admin/borehole-applications', label: 'Borehole Requests', icon: Droplets, description: 'Community water applications', category: 'main' },
   { path: '/admin/tree-planting-tracker', label: 'Planting Tracker', icon: TreePine, description: 'Field monitoring', category: 'monitoring' },
   { path: '/admin/air-quality', label: 'Air Quality', icon: Wind, description: 'Sensor data', category: 'monitoring' },
-  { path: '/admin/banners', label: 'Banners', icon: Image, description: 'Home banners', category: 'content' },
-  { path: '/admin/programs', label: 'Programs', icon: FolderOpen, description: 'Programs', category: 'content' },
-  { path: '/admin/content', label: 'Content', icon: Settings, description: 'Site content', category: 'content' },
-  { path: '/admin/careers', label: 'Careers', icon: Briefcase, description: 'Job listings', category: 'management' },
-  { path: '/admin/recruitment', label: 'Recruitment', icon: UserCheck, description: 'HR pipeline', category: 'management' },
   { path: '/admin/users', label: 'Admin Users', icon: Users, description: 'Roles & access', category: 'management' },
 ];
 
 const groups: { key: MenuItem['category']; label: string }[] = [
   { key: 'main', label: 'Operations' },
   { key: 'monitoring', label: 'Monitoring' },
-  { key: 'content', label: 'Content' },
   { key: 'management', label: 'Management' },
 ];
 
@@ -109,21 +109,26 @@ const AdminSidebar = () => {
     <Sidebar variant="sidebar" collapsible="icon">
       <SidebarContent className="bg-sidebar text-sidebar-foreground">
         {/* Brand */}
-        <div className="px-4 py-5 border-b border-sidebar-border">
+        <div className="px-4 py-5 border-b border-sidebar-border relative">
+          <span className="absolute inset-x-0 top-0 h-0.5 bg-gradient-to-r from-transparent via-accent to-transparent" />
           <div className="flex items-center gap-3">
-            <div
-              className="h-9 w-9 rounded-lg flex items-center justify-center ring-1 ring-sidebar-border shrink-0"
-              style={{ background: 'var(--gradient-gold)' }}
-            >
-              <Shield className="h-5 w-5 text-sidebar-primary-foreground" />
+            <div className="h-10 w-10 rounded-lg bg-white/95 ring-1 ring-sidebar-border shrink-0 flex items-center justify-center overflow-hidden">
+              <img src={ministrySeal.url} alt="Kano State Ministry seal" className="h-8 w-8 object-contain" />
             </div>
             {!collapsed && (
               <div className="min-w-0">
                 <h2 className="text-sm font-semibold tracking-wide truncate">Admin Console</h2>
-                <p className="text-[11px] text-sidebar-foreground/60 truncate">Ministry of Water Resources, Environment and Climate Change</p>
+                <p className="text-[11px] text-sidebar-foreground/60 leading-snug line-clamp-2">
+                  Ministry of Water Resources, Environment &amp; Climate Change
+                </p>
               </div>
             )}
           </div>
+          {!collapsed && (
+            <div className="mt-3 inline-flex items-center gap-1.5 rounded-full border border-accent/30 bg-accent/10 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-accent">
+              <Shield className="h-3 w-3" /> Official Government Portal
+            </div>
+          )}
 
           {!collapsed && adminUser && (
             <div className="mt-4 rounded-md border border-sidebar-border/60 bg-sidebar-accent/40 px-3 py-2">
@@ -220,9 +225,15 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
 
           <div className="flex-1 flex flex-col min-w-0">
             <header className="bg-card border-b border-border sticky top-0 z-30">
+              <span className="block h-0.5 w-full bg-gradient-to-r from-primary via-accent to-primary" />
               <div className="flex items-center justify-between gap-4 px-4 md:px-6 py-3">
                 <div className="flex items-center gap-3 min-w-0">
                   <SidebarTrigger />
+                  <img
+                    src={ministrySeal.url}
+                    alt="Kano State Ministry of Water Resources, Environment and Climate Change seal"
+                    className="h-9 w-9 object-contain shrink-0"
+                  />
                   <div className="hidden md:block min-w-0">
                     <div className="text-[11px] uppercase tracking-[0.18em] text-muted-foreground">
                       Admin · {current?.description ?? 'Console'}
@@ -232,6 +243,7 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
                     </div>
                   </div>
                 </div>
+
 
                 <div className="hidden lg:flex items-center relative flex-1 max-w-md">
                   <Search className="h-4 w-4 absolute left-3 text-muted-foreground" />
@@ -283,7 +295,21 @@ const AdminLayout = ({ children }: AdminLayoutProps) => {
 
             <main className="flex-1 overflow-auto">
               <div className="max-w-7xl mx-auto p-4 md:p-6 lg:p-8">{children}</div>
+              <footer className="border-t border-border mt-6">
+                <div className="max-w-7xl mx-auto px-4 md:px-6 lg:px-8 py-5 flex flex-col sm:flex-row items-center justify-between gap-3">
+                  <div className="flex items-center gap-3">
+                    <img src={ministrySeal.url} alt="Ministry seal" className="h-7 w-7 object-contain opacity-80" />
+                    <p className="text-xs text-muted-foreground text-center sm:text-left">
+                      Kano State Ministry of Water Resources, Environment &amp; Climate Change — Official Administrative Console
+                    </p>
+                  </div>
+                  <p className="text-[11px] text-muted-foreground/70">
+                    © {new Date().getFullYear()} Government of Kano State
+                  </p>
+                </div>
+              </footer>
             </main>
+
           </div>
         </div>
       </SidebarProvider>
